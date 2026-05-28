@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EEPI — Empreendimentos Econômicos em Povos Indígenas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+:root {
+  --terra:#7B3A10;--ocre:#B5521E;--palha:#F2E8D5;--areia:#E0CBA8;
+  --folha:#2D5A27;--noite:#16100A;--cinza:#6B5B4E;--branco:#FAF7F0;
+  --eco:#2D5A27;--eco-bg:#EAF3E0;--eco-lt:#C6E0B4;
+  --nao:#7B1F1F;--nao-bg:#F9E8E8;--nao-lt:#F4C2C2;
+  --rev:#6B4A0A;--rev-bg:#FDF3E0;--rev-lt:#FAD98A;
+  --ass:#1A4A6B;--ass-bg:#E3F0FA;--ass-lt:#A8CCE8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--branco);color:var(--noite);}
+
+header{background:var(--noite);padding:52px 48px 40px;position:relative;overflow:hidden;}
+header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(181,82,30,.05) 14px,rgba(181,82,30,.05) 15px);}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--terra),var(--ocre),#D4855A,var(--ocre),var(--terra));}
+.hi{position:relative;max-width:1180px;margin:0 auto;}
+.hlbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ocre);margin-bottom:14px;}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(28px,3.8vw,50px);font-weight:900;color:var(--palha);line-height:1.1;max-width:680px;}
+header h1 em{font-style:italic;color:var(--ocre);}
+.hsub{color:#8B7560;font-size:13px;margin-top:10px;max-width:620px;line-height:1.6;}
+.hmeta{display:flex;gap:0;margin-top:32px;flex-wrap:wrap;}
+.hmi{padding:0 32px 0 0;display:flex;flex-direction:column;gap:3px;}
+.hmi:first-child{padding-left:0;}
+.hmi+.hmi{border-left:1px solid #2E1E10;padding-left:32px;}
+.hmn{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--palha);}
+.hml{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6B5040;}
+
+nav{background:var(--palha);border-bottom:1px solid var(--areia);padding:0 48px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(26,16,10,.07);}
+.ni{max-width:1180px;margin:0 auto;display:flex;gap:0;}
+nav a{padding:16px 20px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;color:var(--cinza);border-bottom:2px solid transparent;transition:all .2s;font-weight:500;}
+nav a:hover,nav a.on{color:var(--terra);border-bottom-color:var(--terra);}
+
+main{max-width:1180px;margin:0 auto;padding:48px 48px 80px;}
+.sec{margin-bottom:72px;scroll-margin-top:70px;}
+.stit{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--noite);margin-bottom:6px;}
+.ssub{font-size:13px;color:var(--cinza);margin-bottom:28px;line-height:1.6;}
+hr.div{border:none;border-top:1px solid var(--areia);margin-bottom:28px;}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:36px;}
+.card{background:#fff;border:1px solid var(--areia);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
+.clbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cinza);}
+.cnum{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;}
+.cdet{font-size:12px;color:var(--cinza);}
+.card.eco .cnum{color:var(--eco);}
+.card.nao .cnum{color:var(--nao);}
+.card.rev .cnum{color:var(--rev);}
+.card.ass .cnum{color:var(--ass);}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:28px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:28px;}
+@media(max-width:800px){.g2,.g3{grid-template-columns:1fr;}}
+
+.blk{background:#fff;border:1px solid var(--areia);border-radius:12px;padding:24px;}
+.btit{font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--cinza);margin-bottom:18px;}
+
+.bh{display:flex;flex-direction:column;gap:9px;}
+.bi{display:flex;flex-direction:column;gap:3px;}
+.bil{font-size:12px;color:var(--noite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btr{background:#F2EDE5;border-radius:3px;height:10px;overflow:hidden;}
+.bfi{height:100%;border-radius:3px;}
+.bva{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--cinza);}
+
+.tb{width:100%;border-collapse:collapse;font-size:13px;}
+.tb th{text-align:left;padding:8px 12px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cinza);border-bottom:1px solid var(--areia);font-weight:500;}
+.tb td{padding:9px 12px;border-bottom:1px solid #F5F0E8;}
+.tb tr:last-child td{border-bottom:none;}
+.tb tr:hover td{background:#FDFAF5;}
+
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.pill{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;}
+.pill-eco{background:var(--eco-bg);color:var(--eco);border-color:var(--eco-lt);}
+.pill-nao{background:var(--nao-bg);color:var(--nao);border-color:var(--nao-lt);}
+.pill-ass{background:var(--ass-bg);color:var(--ass);border-color:var(--ass-lt);}
+.pill.on{box-shadow:0 0 0 2px currentColor;}
+
+#mapa-wrap{position:relative;}
+#mapa-svg{width:100%;height:420px;display:block;}
+.mtt{position:absolute;background:var(--noite);color:var(--palha);padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:10;}
+.mleg{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--cinza);margin-top:8px;}
+.lrect{width:18px;height:10px;border-radius:2px;display:inline-block;}
+
+.nota{background:var(--rev-bg);border-left:3px solid var(--rev);border-radius:0 8px 8px 0;padding:14px 18px;font-size:13px;color:#5A3C08;line-height:1.7;margin-top:20px;}
+.mleg-mini{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--cinza);margin-bottom:12px;}
+.mli{display:flex;align-items:center;gap:5px;}
+.mlsq{width:10px;height:10px;border-radius:2px;}
+
+footer{background:var(--noite);padding:32px 48px;text-align:center;font-size:12px;color:#5A4030;letter-spacing:1px;}
+footer span{color:#8B6040;}
+
+.langbtn{position:absolute;top:18px;right:18px;border:1px solid #2E1E10;background:rgba(242,232,213,.06);color:var(--palha);border-radius:999px;padding:8px 12px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(6px);}
+.langbtn:hover{border-color:rgba(181,82,30,.65);color:var(--ocre);}
+
+.equipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.pessoa{border:1px solid var(--areia);border-radius:10px;padding:16px 16px;background:#fff;display:flex;flex-direction:column;gap:8px;}
+.pnome{font-weight:600;color:var(--noite);line-height:1.3;}
+.pcargo{font-size:12px;color:var(--cinza);}
+.plnk{font-size:12px;text-decoration:none;color:var(--terra);font-weight:500;display:inline-flex;align-items:center;gap:8px;}
+.plnk:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<header>
+<button class="langbtn" id="langbtn" type="button">EN</button>
+<div class="hi">
+  <h1 data-i18n="hero_title">Empreendimentos<br><em>Econômicos</em> em<br>Povos Indígenas</h1>
+  <p class="hsub" data-i18n="hero_sub">Banco de dados construído a partir de registros no CNPJ/Receita Federal, com classificação por atividade econômica e nível de relevância. Universo: terras indígenas brasileiras.</p>
+  <div class="hmeta">
+    <div class="hmi"><span class="hmn">2.705</span><span class="hml" data-i18n="kpi_cnpjs">CNPJs analisados</span></div>
+    <div class="hmi"><span class="hmn">468</span><span class="hml" data-i18n="kpi_econ">Empreendimentos econômicos</span></div>
+    <div class="hmi"><span class="hmn">1.795</span><span class="hml" data-i18n="kpi_assoc">Associações (var. independente)</span></div>
+    <div class="hmi"><span class="hmn">23</span><span class="hml" data-i18n="kpi_ufs">UFs representadas</span></div>
+  </div>
+</div>
+</header>
+
+<nav>
+<div class="ni">
+  <a href="#sobre" class="on" data-i18n="nav_about">Sobre</a>
+  <a href="#geral" data-i18n="nav_overview">Visão geral</a>
+  <a href="#eco" data-i18n="nav_econ">Econômicos</a>
+  <a href="#nao" data-i18n="nav_nonecon">Não econômicos</a>
+  <a href="#ass" data-i18n="nav_assoc">Associações</a>
+  <a href="#geo" data-i18n="nav_geo">Distribuição geográfica</a>
+  <a href="#metod" data-i18n="nav_method">Metodologia</a>
+  <a href="#equipe" data-i18n="nav_team">Equipe</a>
+</div>
+</nav>
+
+<main>
+
+<!-- SOBRE -->
+<section class="sec" id="sobre">
+<h2 class="stit" data-i18n="about_title">Sobre o site e os dados</h2>
+<p class="ssub" data-i18n="about_sub">Este painel apresenta estatísticas descritivas do banco de dados EEPI (Empreendimentos Econômicos com Participação Indígena), construído a partir de registros do CNPJ (Receita Federal). O objetivo é apoiar a pesquisa, organizar os resultados e tornar transparentes as decisões metodológicas usadas na classificação.</p>
+<hr class="div">
+
+<div class="g2">
+  <div class="blk">
+    <div class="btit" data-i18n="about_what_title">O que este site mostra</div>
+    <p style="font-size:13px;line-height:1.85;color:var(--noite);" data-i18n="about_what_body">
+      As seções abaixo resumem o banco EEPI em quatro dimensões: composição geral (categorias e níveis de relevância),
+      perfil dos empreendimentos classificados como econômicos (variável dependente), perfil dos não econômicos e associações (variável independente),
+      e distribuição por UF.
+    </p>
+  </div>
+  <div class="blk">
+    <div class="btit" data-i18n="about_use_title">Como usar / interpretar</div>
+    <p style="font-size:13px;line-height:1.85;color:var(--noite);" data-i18n="about_use_body">
+      Este banco descreve <strong>formalização no CNPJ</strong> e uma classificação metodológica baseada em sinais e CNAE.
+      Ele não deve ser interpretado como medida perfeita de “economia indígena real” em campo, nem como prova individual de etnicidade.
+      <br><br>
+      A descrição detalhada de fontes, critérios e etapas de construção está em <strong>Notas metodológicas</strong>.
+    </p>
+  </div>
+</div>
+</section>
+
+<!-- GERAL -->
+<section class="sec" id="geral">
+<h2 class="stit" data-i18n="overview_title">Visão geral do banco</h2>
+<p class="ssub" data-i18n="overview_sub">2.705 CNPJs distribuídos em categorias conforme critério metodológico da pesquisa.</p>
+<hr class="div">
+<div class="cards">
+  <div class="card"><span class="clbl" data-i18n="card_total_lbl">Total analisado</span><span class="cnum">2.705</span><span class="cdet" data-i18n="card_total_det">Alto · Muito Alto · Médio Conf. · Médio Prov.</span></div>
+  <div class="card eco"><span class="clbl" data-i18n="card_eco_lbl">Econômico</span><span class="cnum">468</span><span class="cdet" data-i18n="card_eco_det">17,3% do banco · 397 ativas</span></div>
+  <div class="card nao"><span class="clbl" data-i18n="card_nao_lbl">Não econômico</span><span class="cnum">2.026</span><span class="cdet" data-i18n="card_nao_det">74,9% do banco · 1.650 ativas</span></div>
+  <div class="card ass"><span class="clbl" data-i18n="card_ass_lbl">Associações (var. independente)</span><span class="cnum">1.795</span><span class="cdet" data-i18n="card_ass_det">Subconjunto do Não Econômico</span></div>
+</div>
+<div class="blk" style="margin-bottom:28px;">
+  <div class="btit" data-i18n="comp_title">Composição do banco</div>
+  <div class="mleg-mini">
+    <span class="mli"><span class="mlsq" style="background:#2D5A27"></span><span data-i18n="comp_eco">Econômico (468)</span></span>
+    <span class="mli"><span class="mlsq" style="background:#7B1F1F"></span><span data-i18n="comp_nao">Não Econômico (2.026)</span></span>
+  </div>
+  <div style="height:90px;"><canvas id="ch-prop"></canvas></div>
+</div>
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="ov_lvl_title">Por nível de relevância</div><div style="height:220px;"><canvas id="ch-niveis"></canvas></div></div>
+  <div class="blk"><div class="btit" data-i18n="ov_reg_title">Econômicos por região</div><div style="height:220px;"><canvas id="ch-reg-eco"></canvas></div></div>
+</div>
+</section>
+
+<!-- ECONÔMICO -->
+<section class="sec" id="eco">
+<h2 class="stit" data-i18n="eco_title">Empreendimentos econômicos</h2>
+<p class="ssub" data-i18n="eco_sub">468 CNPJs com CNAE principal de atividade produtiva e/ou CNAE secundário econômico confirmado. Variável dependente da pesquisa.</p>
+<hr class="div">
+<div class="g3">
+  <div class="card eco"><span class="clbl" data-i18n="eco_kpi_active_lbl">Ativas</span><span class="cnum">397</span><span class="cdet">84,8%</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_inapt_lbl">Inaptas</span><span class="cnum" style="color:var(--nao)">69</span><span class="cdet">14,7%</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_susp_lbl">Suspensas</span><span class="cnum" style="color:var(--rev)">2</span><span class="cdet">0,4%</span></div>
+</div>
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="eco_nat_title">Natureza jurídica</div><div class="bh" id="bh-nat-eco"></div></div>
+  <div class="blk"><div class="btit" data-i18n="eco_cnae_title">Top 10 CNAE principal</div><div class="bh" id="bh-cnae-eco"></div></div>
+</div>
+<div class="blk" style="margin-bottom:28px;">
+  <div class="btit" data-i18n="eco_sec_title">CNAEs secundários mais frequentes</div>
+  <p style="font-size:12px;color:var(--cinza);margin-bottom:16px;" data-i18n="eco_sec_sub">Atividades registradas além do CNAE principal — excluídos os puramente associativos (9493/9499)</p>
+  <div style="height:320px;"><canvas id="ch-sec"></canvas></div>
+</div>
+<div class="blk">
+  <div class="btit" data-i18n="eco_uf_title">Econômicos por UF</div>
+  <div style="height:280px;"><canvas id="ch-uf-eco"></canvas></div>
+</div>
+</section>
+
+<!-- NÃO ECONÔMICO -->
+<section class="sec" id="nao">
+<h2 class="stit" data-i18n="nao_title">Não econômicos</h2>
+<p class="ssub" data-i18n="nao_sub">2.026 CNPJs cujo CNAE principal e secundário não configuram atividade econômica — escolas, conselhos, igrejas, associações de defesa de direitos etc.</p>
+<hr class="div">
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="nao_cnae_title">CNAE principal</div><div class="bh" id="bh-cnae-nao"></div></div>
+  <div class="blk"><div class="btit" data-i18n="nao_nat_title">Natureza jurídica</div><div class="bh" id="bh-nat-nao"></div></div>
+</div>
+<div class="blk">
+  <div class="btit" data-i18n="nao_uf_title">Não econômicos por UF — top 10</div>
+  <div style="height:280px;"><canvas id="ch-uf-nao"></canvas></div>
+</div>
+</section>
+
+<!-- ASSOCIAÇÕES -->
+<section class="sec" id="ass">
+<h2 class="stit" data-i18n="ass_title">Associações — variável independente</h2>
+<p class="ssub" data-i18n="ass_sub">1.795 organizações da sociedade civil indígena. Subconjunto do "não econômico", constituem a variável independente da pesquisa.</p>
+<hr class="div">
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="ass_nat_title">Natureza jurídica</div><div class="bh" id="bh-nat-ass"></div></div>
+  <div class="blk"><div class="btit" data-i18n="ass_reg_title">Por região</div><div style="height:240px;"><canvas id="ch-reg-ass"></canvas></div></div>
+</div>
+</section>
+
+<!-- GEOGRÁFICO -->
+<section class="sec" id="geo">
+<h2 class="stit" data-i18n="geo_title">Distribuição geográfica</h2>
+<p class="ssub" data-i18n="geo_sub">Amazonas lidera com 99 registros econômicos (21,2%), seguido do Pará (14,5%) e São Paulo (10,9%).</p>
+<hr class="div">
+<div class="blk" style="margin-bottom:28px;">
+  <div class="pills">
+    <button class="pill pill-eco on" onclick="trocarMapa('eco',this)" data-i18n="pill_eco">Econômicos</button>
+    <button class="pill pill-nao" onclick="trocarMapa('nao',this)" data-i18n="pill_nao">Não econômicos</button>
+    <button class="pill pill-ass" onclick="trocarMapa('ass',this)" data-i18n="pill_ass">Associações</button>
+  </div>
+  <div id="mapa-wrap">
+    <div class="mtt" id="mtt"></div>
+    <svg id="mapa-svg" viewBox="0 0 700 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa do Brasil por UF"></svg>
+  </div>
+  <div class="mleg">
+    <span data-i18n="geo_less">Menos</span><span id="mleg-cores"></span><span data-i18n="geo_more">Mais</span>
+    <span style="margin-left:16px;" id="mleg-txt" data-i18n="geo_leg_eco">Econômicos por UF</span>
+  </div>
+</div>
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="geo_tbl_eco_title">Econômicos — todas as UFs</div><table class="tb"><thead><tr><th data-i18n="th_uf">UF</th><th data-i18n="th_qtd">Qtd</th><th>%</th></tr></thead><tbody id="tb-eco"></tbody></table></div>
+  <div class="blk"><div class="btit" data-i18n="geo_tbl_nao_title">Não econômicos — top 10 UFs</div><table class="tb"><thead><tr><th data-i18n="th_uf">UF</th><th data-i18n="th_qtd">Qtd</th><th>%</th></tr></thead><tbody id="tb-nao"></tbody></table></div>
+</div>
+</section>
+
+<!-- METODOLOGIA -->
+<section class="sec" id="metod">
+<h2 class="stit" data-i18n="metod_title">Notas metodológicas</h2>
+<p class="ssub" data-i18n="metod_sub">Critérios de classificação, fontes e decisões documentadas ao longo da construção do banco.</p>
+<hr class="div">
+
+<div class="blk" style="margin-bottom:28px;">
+  <div class="btit" data-i18n="metod_def_title">O que são EEPIs (definição operacional)</div>
+  <p style="font-size:13px;line-height:1.85;color:var(--noite);" data-i18n="metod_def_body">
+    Neste projeto, chamamos de <strong>Empreendimentos Econômicos com Participação Indígena (EEPI)</strong> os CNPJs que apresentam
+    <strong>evidência de participação/identidade indígena</strong> (por sinais no cadastro, como natureza jurídica específica, termos inequívocos
+    ou etnônimos na razão social) e que, adicionalmente, apresentam <strong>indicativo de atividade econômica</strong> no CNAE principal
+    <em>ou</em> em CNAEs secundários.
+    <br><br>
+    A categoria “EEPI” foi escolhida para ser <strong>flexível</strong> e capturar formatos organizacionais frequentes no Brasil (por exemplo,
+    associações que organizam produção e comercialização, mas mantêm CNAE principal do tipo 94xx).
+  </p>
+</div>
+
+<div class="blk" style="margin-bottom:28px;">
+  <div class="btit" data-i18n="metod_tinteco_title">O que é a TintecoV1 (base de Terras Indígenas)</div>
+  <p style="font-size:13px;line-height:1.85;color:var(--noite);" data-i18n="metod_tinteco_body">
+    A <strong>TintecoV1</strong> é uma planilha do grupo de pesquisa que organiza uma <strong>amostra representativa de 250 Terras Indígenas (TIs)</strong>
+    selecionadas para inferir sobre o universo de TIs registradas pela FUNAI (base 2019).
+    Cada TI pode incidir em um ou mais municípios; ao desdobrar os municípios da amostra, obtém-se um conjunto de municípios que serve como
+    <strong>recorte geográfico</strong> para o cruzamento com o CNPJ.
+    <br><br>
+    Uma página dedicada à TintecoV1 (com a descrição completa de variáveis e desenho amostral) está prevista para integração futura.
+  </p>
+</div>
+
+<div class="blk" style="margin-bottom:28px;">
+  <div class="btit" data-i18n="metod_pipeline_title">Como o banco foi construído (passo a passo)</div>
+  <p style="font-size:13px;line-height:1.85;color:var(--noite);margin-bottom:12px;" data-i18n="metod_pipeline_sub">
+    A construção do banco seguiu um fluxo conservador, priorizando rastreabilidade e redução de falsos positivos:
+  </p>
+  <table class="tb" aria-label="Passos de construção do banco">
+    <tbody>
+      <tr><td style="color:var(--cinza);font-size:12px;white-space:nowrap;" data-i18n="pipe_1_lbl">1) Municípios</td><td data-i18n="pipe_1_body">Extração e normalização dos municípios associados às 250 TIs (TintecoV1) e mapeamento para o código de município da Receita Federal.</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;white-space:nowrap;" data-i18n="pipe_2_lbl">2) Filtragem</td><td data-i18n="pipe_2_body">Busca, nos dados abertos do CNPJ, por CNPJs com sinais de identidade/participação indígena (termos inequívocos, etnônimos, natureza jurídica específica) e localização nos municípios da amostra.</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;white-space:nowrap;" data-i18n="pipe_3_lbl">3) Score</td><td data-i18n="pipe_3_body">Aplicação de um sistema de pontuação hierárquico: critérios fortes valem mais; sinais ambíguos isolados não incluem um registro.</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;white-space:nowrap;" data-i18n="pipe_4_lbl">4) Enriquecimento</td><td data-i18n="pipe_4_body">Consulta e padronização de dados por API (situação cadastral, CNAEs secundários estruturados, endereço, QSA quando disponível) com cache e controle de taxa.</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;white-space:nowrap;" data-i18n="pipe_5_lbl">5) Critério econômico</td><td data-i18n="pipe_5_body">Critério metodológico: um registro entra como <strong>Econômico</strong> se há indicativo de atividade econômica no CNAE principal <em>ou</em> no secundário. Se for 94xx sem CNAE econômico, vai para <strong>Associações</strong> (variável independente).</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="g2">
+  <div class="blk">
+    <div class="btit" data-i18n="metod_crit_title">Critério de classificação</div>
+    <p style="font-size:13px;line-height:1.8;">
+      <span data-i18n="metod_crit_body"> <strong style="color:var(--eco)">Variável dependente:</strong> CNPJs com CNAE principal econômico e CNAE secundário confirmando atividade produtiva.<br><br>
+      <strong style="color:var(--ass)">Variável independente:</strong> Associações da sociedade civil indígena — CNAE 94xx sem indicativo econômico.<br><br>
+      <strong>Observação:</strong> o painel público apresenta apenas os conjuntos consolidados utilizados na análise principal.</span>
+    </p>
+  </div>
+  <div class="blk">
+    <div class="btit" data-i18n="metod_source_title">Fonte e processo</div>
+    <table class="tb"><tbody>
+      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_src_lbl">Fonte</td><td data-i18n="metod_src_body">Receita Federal via minhareceita.org</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_univ_lbl">Universo</td><td data-i18n="metod_univ_body">CNPJs associados a Terras Indígenas</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_lvls_lbl">Níveis</td><td data-i18n="metod_lvls_body">Alto · Muito Alto · Médio Conf. · Médio Prov.</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_cls_lbl">Classificação</td><td data-i18n="metod_cls_body">Algoritmo de pontuação CNAE + razão social</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_qsa_lbl">Sócios (Muito Alto)</td><td data-i18n="metod_qsa_body">API retorna QSA vazio — org. indígenas não registram diretoria na RF</td></tr>
+    </tbody></table>
+  </div>
+</div>
+<div class="nota" data-i18n="metod_lim"> <strong>Limitação estrutural:</strong> CNPJs de organizações indígenas são cronicamente sub-cadastrados. O CNAE 94xx é genérico e não discrimina entre atividade econômica e associativismo puro. Isso afeta especialmente os 1.795 registros da variável independente — a ausência de indicativo econômico no CNPJ não significa ausência de atividade econômica real.</div>
+</section>
+
+<!-- EQUIPE -->
+<section class="sec" id="equipe">
+<h2 class="stit" data-i18n="team_title">Envolvidos no projeto</h2>
+<p class="ssub" data-i18n="team_sub">Equipe responsável pela orientação, construção do banco e desenvolvimento do site. Links para os currículos Lattes.</p>
+<hr class="div">
+<div class="blk">
+  <div class="btit" data-i18n="team_lbl">Equipe</div>
+  <div class="equipe">
+    <div class="pessoa">
+      <div class="pnome">Leonardo Barros Soares</div>
+      <div class="pcargo" data-i18n="team_role_coord">Coordenador do projeto</div>
+      <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K4210013U6" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
+    </div>
+    <div class="pessoa">
+      <div class="pnome">Pedro Barbosa de Freitas</div>
+      <div class="pcargo" data-i18n="team_role_researcher">Pesquisador</div>
+      <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1111560Z6" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
+    </div>
+    <div class="pessoa">
+      <div class="pnome">Bruno Eduardo Gomes Gonçalves</div>
+      <div class="pcargo" data-i18n="team_role_researcher">Pesquisador</div>
+      <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1580289D7" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
+    </div>
+    <div class="pessoa">
+      <div class="pnome">Ludmyla Romualdo de Jesus</div>
+      <div class="pcargo" data-i18n="team_role_researcher_f">Pesquisadora</div>
+      <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1105088T4" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
+    </div>
+  </div>
+</div>
+</section>
+
+</main>
+
+<footer>
+  <span data-i18n="footer_title">EEPI · Empreendimentos Econômicos em Povos Indígenas</span><br>
+  <span data-i18n="footer_data">Dados: Receita Federal / minhareceita.org</span><br>
+  <span data-i18n="footer_team">Equipe:</span>
+  <a href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K4210013U6" target="_blank" rel="noopener noreferrer" style="color:#8B6040;text-decoration:none;">Leonardo Barros Soares</a> ·
+  <a href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1111560Z6" target="_blank" rel="noopener noreferrer" style="color:#8B6040;text-decoration:none;">Pedro Barbosa de Freitas</a> ·
+  <a href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1580289D7" target="_blank" rel="noopener noreferrer" style="color:#8B6040;text-decoration:none;">Bruno Eduardo Gomes Gonçalves</a> ·
+  <a href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1105088T4" target="_blank" rel="noopener noreferrer" style="color:#8B6040;text-decoration:none;">Ludmyla Romualdo de Jesus</a>
+</footer>
+
+<script>
+// ── DADOS ─────────────────────────────────────────────────────────────────
+const ECO_UF  = {AM:99,PA:68,SP:51,MT:41,MS:40,MA:23,BA:23,RR:20,RS:19,PE:14,AC:13,TO:11,AL:9,CE:9,RO:7,ES:6,PR:6,AP:4,RJ:2,SC:2,MG:1};
+const NAO_UF  = {AM:398,MT:229,MS:228,MA:194,PA:176,RR:119,PE:97,SP:87,BA:83,RS:65,CE:51,AL:49,TO:45,PR:41,AC:39,RO:36,SC:26,ES:18,AP:17,MG:15,RJ:7,GO:5,RN:1};
+const ASS_UF  = {AM:383,MT:201,MS:194,MA:176,PA:156,RR:112,PE:91,SP:74,BA:61,RS:59,TO:43,PR:39,RO:35,AL:35,AC:30,SC:26,CE:21,ES:16,AP:16,MG:15,RJ:7,GO:4,RN:1};
+const MAPA_DADOS = {eco:ECO_UF, nao:NAO_UF, ass:ASS_UF};
+const MAPA_TOT   = {eco:468, nao:2026, ass:1795};
+const MAPA_CORES = {
+  eco:['#C7E9C0','#A1D99B','#74C476','#41AB5D','#238B45','#006D2C','#00441B'],
+  nao:['#FCBBA1','#FC9272','#FB6A4A','#EF3B2C','#CB181D','#A50F15','#67000D'],
+  ass:['#C6DBEF','#9ECAE1','#6BAED6','#4292C6','#2171B5','#08519C','#08306B']
+};
+// labels are provided by i18n (see getMapaLabel)
+
+const UF_NOME = {AC:'Acre',AL:'Alagoas',AM:'Amazonas',AP:'Amapá',BA:'Bahia',CE:'Ceará',DF:'Dist. Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MG:'Minas Gerais',MS:'Mato Grosso do Sul',MT:'Mato Grosso',PA:'Pará',PB:'Paraíba',PE:'Pernambuco',PI:'Piauí',PR:'Paraná',RJ:'Rio de Janeiro',RN:'Rio G. do Norte',RO:'Rondônia',RR:'Roraima',RS:'Rio G. do Sul',SC:'Santa Catarina',SE:'Sergipe',SP:'São Paulo',TO:'Tocantins'};
+
+// posições no viewBox 700×480 (projetadas manualmente)
+const ST = [
+  {s:'RR',x:195,y:72},{s:'AP',x:345,y:85},{s:'AM',x:170,y:170},{s:'PA',x:330,y:155},
+  {s:'MA',x:408,y:155},{s:'PI',x:440,y:185},{s:'CE',x:480,y:168},{s:'RN',x:508,y:162},
+  {s:'PB',x:507,y:182},{s:'PE',x:492,y:200},{s:'AL',s2:'AL',x:510,y:218},{s:'SE',x:505,y:232},
+  {s:'BA',x:452,y:255},{s:'AC',x:88,y:238},{s:'RO',x:188,y:258},{s:'MT',x:256,y:250},
+  {s:'TO',x:373,y:222},{s:'GO',x:348,y:298},{s:'DF',x:368,y:316},{s:'MG',x:416,y:318},
+  {s:'ES',x:456,y:328},{s:'RJ',x:434,y:348},{s:'SP',x:378,y:362},{s:'MS',x:295,y:358},
+  {s:'PR',x:334,y:390},{s:'SC',x:345,y:415},{s:'RS',x:318,y:438}
+];
+
+// ── BARRAS HORIZONTAIS ────────────────────────────────────────────────────
+function barras(id, obj, cor, total) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const entries = Object.entries(obj);
+  const maxV = Math.max(...entries.map(e=>e[1]));
+  el.innerHTML = entries.map(([k,v]) => {
+    const w = Math.round(v/maxV*100);
+    const pct = (v/total*100).toFixed(1);
+    return `<div class="bi">
+      <div class="bil" title="${k}">${k}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="btr" style="flex:1;"><div class="bfi" style="width:${w}%;background:${cor};"></div></div>
+        <span class="bva">${v} <span style="color:#B0A090">(${pct}%)</span></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildBars(lang) {
+  if (lang === 'en') {
+    barras('bh-nat-eco', {'Private association':276,'Limited liability company (LTDA)':67,Cooperative:48,'Sole proprietor':13,'Indigenous community':6,'Closed corporation':2,'Private foundation':1,'Union entity':1}, '#2D5A27', 468);
+    barras('bh-cnae-eco', {'Rights-defense associations':177,'Culture and arts orgs':29,'Unspecified associations':28,'Agriculture support':18,'Clothing retail':9,'Souvenirs/handicrafts retail':8,'Cassava cultivation':7,'Professional associations':6,'Wholesale of agricultural materials':5,'Livestock support':5}, '#2D5A27', 468);
+    barras('bh-cnae-nao', {'Rights-defense associations':1277,'Unspecified associations':337,'School boards admin.':85,'Culture and arts orgs':77,'Religious organizations':54,'Elementary education':52,'General public administration':35,'Secondary education':17}, '#7B1F1F', 2026);
+    barras('bh-nat-nao', {'Private association':1665,'Indigenous community':45,'Religious organization':45,'Federal public foundation':22,'Condominium':6,'Social organization':5,'Limited liability company (LTDA)':4,'Private foundation':3}, '#7B1F1F', 2026);
+    barras('bh-nat-ass', {'Private association':1553,'Religious organization':45,'Indigenous community':44,'Social organization':5,'Private foundation':3}, '#1A4A6B', 1795);
+    return;
+  }
+  barras('bh-nat-eco', {Associação_Privada:276,'Soc. Empresária Ltda':67,Cooperativa:48,'Empresário Individual':13,'Comunidade Indígena':6,'Soc. Anônima Fechada':2,'Fundação Privada':1,'Entidade Sindical':1}, '#2D5A27', 468);
+  barras('bh-cnae-eco', {'Def. de direitos sociais':177,'Org. cultura e arte':29,'Assoc. não especificadas':28,'Apoio à agricultura':18,'Com. vestuário':9,'Com. suvenires/artesanato':8,'Cultivo de mandioca':7,'Assoc. profissionais':6,'Com. atacadista mat. agrícolas':5,'Apoio à pecuária':5}, '#2D5A27', 468);
+  barras('bh-cnae-nao', {'Def. de direitos sociais':1277,'Assoc. não especificadas':337,'Adm. caixas escolares':85,'Org. cultura e arte':77,'Organizações religiosas':54,'Ensino fundamental':52,'Adm. pública em geral':35,'Ensino médio':17}, '#7B1F1F', 2026);
+  barras('bh-nat-nao', {'Associação Privada':1665,'Comunidade Indígena':45,'Organização Religiosa':45,'Fundação Pública Federal':22,'Condomínio Edilício':6,'Organização Social':5,'Soc. Empresária Ltda':4,'Fundação Privada':3}, '#7B1F1F', 2026);
+  barras('bh-nat-ass', {'Associação Privada':1553,'Organização Religiosa':45,'Comunidade Indígena':44,'Organização Social':5,'Fundação Privada':3}, '#1A4A6B', 1795);
+}
+
+// ── TABELAS ───────────────────────────────────────────────────────────────
+const tbEco = document.getElementById('tb-eco');
+Object.entries(ECO_UF).sort((a,b)=>b[1]-a[1]).forEach(([uf,n]) => {
+  tbEco.innerHTML += `<tr><td><strong>${uf}</strong> — ${UF_NOME[uf]||''}</td><td>${n}</td><td>${(n/468*100).toFixed(1)}%</td></tr>`;
+});
+const tbNao = document.getElementById('tb-nao');
+Object.entries(NAO_UF).sort((a,b)=>b[1]-a[1]).slice(0,10).forEach(([uf,n]) => {
+  tbNao.innerHTML += `<tr><td><strong>${uf}</strong> — ${UF_NOME[uf]||''}</td><td>${n}</td><td>${(n/2026*100).toFixed(1)}%</td></tr>`;
+});
+
+// ── CHARTS.JS ─────────────────────────────────────────────────────────────
+const CFONT = {family:"'IBM Plex Sans', sans-serif", size:11};
+let CH = {};
+
+function destroyCharts() {
+  Object.values(CH).forEach(c => { try { c.destroy(); } catch(e){} });
+  CH = {};
+}
+
+function buildCharts(lang) {
+  destroyCharts();
+  const L = (I18N[lang] || I18N.pt);
+
+  CH.prop = new Chart(document.getElementById('ch-prop'), {
+    type:'bar',
+    data:{labels:[''],datasets:[
+      {label:L.comp_eco, data:[468], backgroundColor:'#2D5A27'},
+      {label:L.comp_nao, data:[2026], backgroundColor:'#7B1F1F'}
+    ]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      scales:{x:{stacked:true,display:false},y:{stacked:true,display:false}},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:CFONT}}}}
+  });
+
+  CH.niveis = new Chart(document.getElementById('ch-niveis'), {
+    type:'bar',
+    data:{labels:lang==='en' ? ['Very High','High','Medium (conf.)','Medium (prob.)'] : ['Muito Alto','Alto','Médio Conf.','Médio Prov.'],
+      datasets:[{data:[41,2289,130,245],backgroundColor:['#8B3A1A','#B5521E','#C47A3A','#D4A060'],borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},x:{grid:{display:false},ticks:{font:CFONT}}}}
+  });
+
+  CH.regEco = new Chart(document.getElementById('ch-reg-eco'), {
+    type:'doughnut',
+    data:{labels:lang==='en' ? ['North','Center-West','Northeast','Southeast','South'] : ['Norte','Centro-Oeste','Nordeste','Sudeste','Sul'],
+      datasets:[{data:[222,81,78,60,27],backgroundColor:['#1A4A3A','#2D5A27','#4A7A40','#6A9A60','#8ABA80'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:CFONT}}}}
+  });
+
+  const secTop = lang==='en'
+    ? [['Agriculture support',117],['Cassava cultivation',87],['Corn cultivation',85],['Other temporary crops',77],['Horticulture',74],['Cassava flour manufacturing',72],['Fish farming',71],['Banana cultivation',71],['Souvenirs/handicrafts retail',68],['Açaí cultivation',63]]
+    : [['Apoio à agricultura',117],['Cultivo de mandioca',87],['Cultivo de milho',85],['Outras lavouras temp.',77],['Horticultura',74],['Fab. farinha de mandioca',72],['Criação de peixes',71],['Cultivo de banana',71],['Com. suvenires/artesanato',68],['Cultivo de açaí',63]];
+  CH.sec = new Chart(document.getElementById('ch-sec'), {
+    type:'bar',
+    data:{labels:secTop.map(d=>d[0]),datasets:[{data:secTop.map(d=>d[1]),backgroundColor:'#4A8A50',borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},y:{grid:{display:false},ticks:{font:CFONT}}}}
+  });
+
+  const ufEcoTop = Object.entries(ECO_UF).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  CH.ufEco = new Chart(document.getElementById('ch-uf-eco'), {
+    type:'bar',
+    data:{labels:ufEcoTop.map(d=>d[0]),datasets:[{data:ufEcoTop.map(d=>d[1]),backgroundColor:'#2D5A27',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},x:{grid:{display:false},ticks:{font:CFONT}}}}
+  });
+
+  const ufNaoTop = Object.entries(NAO_UF).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  CH.ufNao = new Chart(document.getElementById('ch-uf-nao'), {
+    type:'bar',
+    data:{labels:ufNaoTop.map(d=>d[0]),datasets:[{data:ufNaoTop.map(d=>d[1]),backgroundColor:'#7B1F1F',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},x:{grid:{display:false},ticks:{font:CFONT}}}}
+  });
+
+  CH.regAss = new Chart(document.getElementById('ch-reg-ass'), {
+    type:'bar',
+    data:{labels:lang==='en' ? ['North','Center-West','Northeast','South','Southeast'] : ['Norte','Centro-Oeste','Nordeste','Sul','Sudeste'],
+      datasets:[{data:[775,399,385,124,112],backgroundColor:'#1A4A6B',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},x:{grid:{display:false},ticks:{font:CFONT}}}}
+  });
+}
+
+// ── MAPA ──────────────────────────────────────────────────────────────────
+let mapaAtual = 'eco';
+let LANG = 'pt';
+
+function getMapaLabel(tipo) {
+  if (tipo === 'eco') return (LANG === 'en') ? 'Economic by state' : 'Econômicos por UF';
+  if (tipo === 'nao') return (LANG === 'en') ? 'Non-economic by state' : 'Não econômicos por UF';
+  return (LANG === 'en') ? 'Associations by state' : 'Associações por UF';
+}
+
+function getRegistroLabel(v) {
+  if (LANG === 'en') return v === 1 ? 'record' : 'records';
+  return v === 1 ? 'registro' : 'registros';
+}
+
+function getCor(v, maxV, cores) {
+  if (!v || v === 0) return '#EDE8E0';
+  const idx = Math.min(6, Math.floor(v / maxV * 6.99));
+  return cores[idx];
+}
+
+function renderMapa(tipo) {
+  const dados = MAPA_DADOS[tipo];
+  const cores = MAPA_CORES[tipo];
+  const maxV = Math.max(...Object.values(dados));
+  const total = MAPA_TOT[tipo];
+  const svg = document.getElementById('mapa-svg');
+  const mtt = document.getElementById('mtt');
+  const wrap = document.getElementById('mapa-wrap');
+
+  document.getElementById('mleg-txt').textContent = getMapaLabel(tipo);
+  document.getElementById('mleg-cores').innerHTML = cores.map(c=>`<span class="lrect" style="background:${c}"></span>`).join('');
+
+  svg.innerHTML = '';
+
+  ST.forEach(st => {
+    const v = dados[st.s] || 0;
+    const cor = getCor(v, maxV, cores);
+    const r = v > 0 ? Math.max(16, Math.min(52, 16 + (v / maxV) * 36)) : 14;
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'pointer';
+
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', st.x); c.setAttribute('cy', st.y); c.setAttribute('r', r);
+    c.setAttribute('fill', cor); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1.5');
+    c.style.transition = 'r .2s, opacity .2s';
+
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', st.x); t.setAttribute('y', st.y);
+    t.setAttribute('dominant-baseline','middle'); t.setAttribute('text-anchor','middle');
+    t.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#1a1a1a;pointer-events:none;font-weight:500;";
+    t.textContent = st.s;
+
+    g.addEventListener('mouseenter', function(e) {
+      c.setAttribute('r', r + 4); c.style.opacity = '.85';
+    });
+    g.addEventListener('mouseleave', function() {
+      c.setAttribute('r', r); c.style.opacity = '1';
+      mtt.style.opacity = '0';
+    });
+    g.addEventListener('mousemove', function(e) {
+      const rect = wrap.getBoundingClientRect();
+      const pct = v > 0 ? (v/total*100).toFixed(1) : '0.0';
+      mtt.innerHTML = `<strong>${UF_NOME[st.s]||st.s}</strong><br>${v} ${getRegistroLabel(v)} · ${pct}%`;
+      mtt.style.opacity = '1';
+      mtt.style.left = (e.clientX - rect.left + 14) + 'px';
+      mtt.style.top  = (e.clientY - rect.top  - 42) + 'px';
+    });
+    g.addEventListener('click', function() {
+      const url = `./estado.html?uf=${encodeURIComponent(st.s)}&tipo=${encodeURIComponent(mapaAtual)}&lang=${encodeURIComponent(LANG)}`;
+      window.open(url, '_blank', 'noopener');
+    });
+
+    g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+  });
+}
+
+function trocarMapa(tipo, btn) {
+  mapaAtual = tipo;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  renderMapa(tipo);
+}
+
+renderMapa('eco');
+
+// ── MAPA POLÍGONOS via CDN (se disponível) ────────────────────────────────
+fetch('https://cdn.jsdelivr.net/npm/brazil-atlas@1.1.0/brazil/states.json')
+  .then(r => { if(!r.ok) throw new Error('CDN indisponível'); return r.json(); })
+  .then(br => {
+    const features = topojson.feature(br, br.objects.states).features;
+    const svg = document.getElementById('mapa-svg');
+    const wrap = document.getElementById('mapa-wrap');
+    const mtt = document.getElementById('mtt');
+    const W = 700, H = 480;
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+    const proj = d3.geoMercator().center([-54,-14]).scale(W*0.92).translate([W/2, H/2]);
+    const path = d3.geoPath(proj);
+
+    function renderPoly(tipo) {
+      const dados = MAPA_DADOS[tipo];
+      const cores = MAPA_CORES[tipo];
+      const maxV = Math.max(...Object.values(dados));
+      const total = MAPA_TOT[tipo];
+      document.getElementById('mleg-txt').textContent = getMapaLabel(tipo);
+      document.getElementById('mleg-cores').innerHTML = cores.map(c=>`<span class="lrect" style="background:${c}"></span>`).join('');
+
+      svg.querySelectorAll('path').forEach(p => {
+        const uf = p.getAttribute('data-uf');
+        const v = uf ? (dados[uf] || 0) : 0;
+        p.setAttribute('fill', getCor(v, maxV, cores));
+      });
+    }
+
+    // Draw polygons
+    features.forEach(f => {
+      const uf = f.properties.sigla;
+      const el = document.createElementNS('http://www.w3.org/2000/svg','path');
+      el.setAttribute('d', path(f));
+      el.setAttribute('data-uf', uf);
+      el.setAttribute('stroke','#fff');
+      el.setAttribute('stroke-width','0.5');
+      el.style.transition = 'fill .25s';
+      el.style.cursor = 'pointer';
+
+      el.addEventListener('mousemove', function(e) {
+        const v = MAPA_DADOS[mapaAtual][uf] || 0;
+        const tot = MAPA_TOT[mapaAtual];
+        const rect = wrap.getBoundingClientRect();
+        mtt.innerHTML = `<strong>${UF_NOME[uf]||uf}</strong><br>${v} ${getRegistroLabel(v)} · ${v>0?(v/tot*100).toFixed(1):0}%`;
+        mtt.style.opacity = '1';
+        mtt.style.left = (e.clientX - rect.left + 14) + 'px';
+        mtt.style.top  = (e.clientY - rect.top  - 42) + 'px';
+      });
+      el.addEventListener('mouseleave', () => { mtt.style.opacity='0'; });
+      el.addEventListener('click', () => {
+        const url = `./estado.html?uf=${encodeURIComponent(uf)}&tipo=${encodeURIComponent(mapaAtual)}&lang=${encodeURIComponent(LANG)}`;
+        window.open(url, '_blank', 'noopener');
+      });
+      svg.appendChild(el);
+    });
+
+    // Override trocarMapa to use polygon version
+    window.trocarMapa = function(tipo, btn) {
+      mapaAtual = tipo;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+      btn.classList.add('on');
+      renderPoly(tipo);
+    };
+
+    renderPoly('eco');
+  })
+  .catch(() => { /* mantém mapa de bolhas */ });
+
+// ── NAV SCROLL ────────────────────────────────────────────────────────────
+document.querySelectorAll('nav a').forEach(a => {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('nav a').forEach(x => x.classList.remove('on'));
+    this.classList.add('on');
+    document.getElementById(this.getAttribute('href').slice(1)).scrollIntoView({behavior:'smooth'});
+  });
+});
+window.addEventListener('scroll', () => {
+  let cur = '';
+  document.querySelectorAll('.sec').forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + cur));
+});
+
+// ── I18N (PT/EN) ───────────────────────────────────────────────────────────
+const I18N = {
+  pt: {
+    hero_title: "Empreendimentos<br><em>Econômicos</em> em<br>Povos Indígenas",
+    hero_sub: "Banco de dados construído a partir de registros no CNPJ/Receita Federal, com classificação por atividade econômica e nível de relevância. Universo: terras indígenas brasileiras.",
+    kpi_cnpjs: "CNPJs analisados",
+    kpi_econ: "Empreendimentos econômicos",
+    kpi_assoc: "Associações (var. independente)",
+    kpi_ufs: "UFs representadas",
+    nav_about: "Sobre",
+    nav_overview: "Visão geral",
+    nav_econ: "Econômicos",
+    nav_nonecon: "Não econômicos",
+    nav_assoc: "Associações",
+    nav_geo: "Distribuição geográfica",
+    nav_method: "Metodologia",
+    nav_team: "Equipe",
+    about_title: "Sobre o site e os dados",
+    about_sub: "Este painel apresenta estatísticas descritivas do banco de dados EEPI (Empreendimentos Econômicos com Participação Indígena), construído a partir de registros do CNPJ (Receita Federal). O objetivo é apoiar a pesquisa, organizar os resultados e tornar transparentes as decisões metodológicas usadas na classificação.",
+    about_what_title: "O que este site mostra",
+    about_what_body: "As seções abaixo resumem o banco EEPI em quatro dimensões: composição geral (categorias e níveis de relevância), perfil dos empreendimentos classificados como econômicos (variável dependente), perfil dos não econômicos e associações (variável independente), e distribuição por UF.",
+    about_use_title: "Como usar / interpretar",
+    about_use_body: "Este banco descreve <strong>formalização no CNPJ</strong> e uma classificação metodológica baseada em sinais e CNAE. Ele não deve ser interpretado como medida perfeita de “economia indígena real” em campo, nem como prova individual de etnicidade.<br><br>A descrição detalhada de fontes, critérios e etapas de construção está em <strong>Notas metodológicas</strong>.",
+    overview_title: "Visão geral do banco",
+    overview_sub: "2.705 CNPJs distribuídos em categorias conforme critério metodológico da pesquisa.",
+    card_total_lbl: "Total analisado",
+    card_total_det: "Alto · Muito Alto · Médio Conf. · Médio Prov.",
+    card_eco_lbl: "Econômico",
+    card_eco_det: "17,3% do banco · 397 ativas",
+    card_nao_lbl: "Não econômico",
+    card_nao_det: "74,9% do banco · 1.650 ativas",
+    card_ass_lbl: "Associações (var. independente)",
+    card_ass_det: "Subconjunto do Não Econômico",
+    comp_title: "Composição do banco",
+    comp_eco: "Econômico (468)",
+    comp_nao: "Não Econômico (2.026)",
+    ov_lvl_title: "Por nível de relevância",
+    ov_reg_title: "Econômicos por região",
+    eco_title: "Empreendimentos econômicos",
+    eco_sub: "468 CNPJs com CNAE principal de atividade produtiva e/ou CNAE secundário econômico confirmado. Variável dependente da pesquisa.",
+    eco_kpi_active_lbl: "Ativas",
+    eco_kpi_inapt_lbl: "Inaptas",
+    eco_kpi_susp_lbl: "Suspensas",
+    eco_nat_title: "Natureza jurídica",
+    eco_cnae_title: "Top 10 CNAE principal",
+    eco_sec_title: "CNAEs secundários mais frequentes",
+    eco_sec_sub: "Atividades registradas além do CNAE principal — excluídos os puramente associativos (9493/9499)",
+    eco_uf_title: "Econômicos por UF",
+    nao_title: "Não econômicos",
+    nao_sub: "2.026 CNPJs cujo CNAE principal e secundário não configuram atividade econômica — escolas, conselhos, igrejas, associações de defesa de direitos etc.",
+    nao_cnae_title: "CNAE principal",
+    nao_nat_title: "Natureza jurídica",
+    nao_uf_title: "Não econômicos por UF — top 10",
+    ass_title: "Associações — variável independente",
+    ass_sub: "1.795 organizações da sociedade civil indígena. Subconjunto do \"não econômico\", constituem a variável independente da pesquisa.",
+    ass_nat_title: "Natureza jurídica",
+    ass_reg_title: "Por região",
+    geo_title: "Distribuição geográfica",
+    geo_sub: "Amazonas lidera com 99 registros econômicos (21,2%), seguido do Pará (14,5%) e São Paulo (10,9%).",
+    pill_eco: "Econômicos",
+    pill_nao: "Não econômicos",
+    pill_ass: "Associações",
+    geo_less: "Menos",
+    geo_more: "Mais",
+    geo_leg_eco: "Econômicos por UF",
+    geo_tbl_eco_title: "Econômicos — todas as UFs",
+    geo_tbl_nao_title: "Não econômicos — top 10 UFs",
+    th_uf: "UF",
+    th_qtd: "Qtd",
+    metod_title: "Notas metodológicas",
+    metod_sub: "Critérios de classificação, fontes e decisões documentadas ao longo da construção do banco.",
+    metod_def_title: "O que são EEPIs (definição operacional)",
+    metod_def_body: "Neste projeto, chamamos de <strong>Empreendimentos Econômicos com Participação Indígena (EEPI)</strong> os CNPJs que apresentam <strong>evidência de participação/identidade indígena</strong> (por sinais no cadastro, como natureza jurídica específica, termos inequívocos ou etnônimos na razão social) e que, adicionalmente, apresentam <strong>indicativo de atividade econômica</strong> no CNAE principal <em>ou</em> em CNAEs secundários.<br><br>A categoria “EEPI” foi escolhida para ser <strong>flexível</strong> e capturar formatos organizacionais frequentes no Brasil (por exemplo, associações que organizam produção e comercialização, mas mantêm CNAE principal do tipo 94xx).",
+    metod_tinteco_title: "O que é a TintecoV1 (base de Terras Indígenas)",
+    metod_tinteco_body: "A <strong>TintecoV1</strong> é uma planilha do grupo de pesquisa que organiza uma <strong>amostra representativa de 250 Terras Indígenas (TIs)</strong> selecionadas para inferir sobre o universo de TIs registradas pela FUNAI (base 2019). Cada TI pode incidir em um ou mais municípios; ao desdobrar os municípios da amostra, obtém-se um conjunto de municípios que serve como <strong>recorte geográfico</strong> para o cruzamento com o CNPJ.<br><br>Uma página dedicada à TintecoV1 (com a descrição completa de variáveis e desenho amostral) está prevista para integração futura.",
+    metod_pipeline_title: "Como o banco foi construído (passo a passo)",
+    metod_pipeline_sub: "A construção do banco seguiu um fluxo conservador, priorizando rastreabilidade e redução de falsos positivos:",
+    pipe_1_lbl: "1) Municípios",
+    pipe_1_body: "Extração e normalização dos municípios associados às 250 TIs (TintecoV1) e mapeamento para o código de município da Receita Federal.",
+    pipe_2_lbl: "2) Filtragem",
+    pipe_2_body: "Busca, nos dados abertos do CNPJ, por CNPJs com sinais de identidade/participação indígena (termos inequívocos, etnônimos, natureza jurídica específica) e localização nos municípios da amostra.",
+    pipe_3_lbl: "3) Score",
+    pipe_3_body: "Aplicação de um sistema de pontuação hierárquico: critérios fortes valem mais; sinais ambíguos isolados não incluem um registro.",
+    pipe_4_lbl: "4) Enriquecimento",
+    pipe_4_body: "Consulta e padronização de dados por API (situação cadastral, CNAEs secundários estruturados, endereço, QSA quando disponível) com cache e controle de taxa.",
+    pipe_5_lbl: "5) Critério econômico",
+    pipe_5_body: "Critério metodológico: um registro entra como <strong>Econômico</strong> se há indicativo de atividade econômica no CNAE principal <em>ou</em> no secundário. Se for 94xx sem CNAE econômico, vai para <strong>Associações</strong> (variável independente).",
+    metod_crit_title: "Critério de classificação",
+    metod_crit_body: "<strong style=\"color:var(--eco)\">Variável dependente:</strong> CNPJs com CNAE principal econômico e CNAE secundário confirmando atividade produtiva.<br><br><strong style=\"color:var(--ass)\">Variável independente:</strong> Associações da sociedade civil indígena — CNAE 94xx sem indicativo econômico.<br><br><strong>Observação:</strong> o painel público apresenta apenas os conjuntos consolidados utilizados na análise principal.",
+    metod_source_title: "Fonte e processo",
+    metod_src_lbl: "Fonte",
+    metod_src_body: "Receita Federal via minhareceita.org",
+    metod_univ_lbl: "Universo",
+    metod_univ_body: "CNPJs associados a Terras Indígenas",
+    metod_lvls_lbl: "Níveis",
+    metod_lvls_body: "Alto · Muito Alto · Médio Conf. · Médio Prov.",
+    metod_cls_lbl: "Classificação",
+    metod_cls_body: "Algoritmo de pontuação CNAE + razão social",
+    metod_qsa_lbl: "Sócios (Muito Alto)",
+    metod_qsa_body: "API retorna QSA vazio — org. indígenas não registram diretoria na RF",
+    metod_lim: "<strong>Limitação estrutural:</strong> CNPJs de organizações indígenas são cronicamente sub-cadastrados. O CNAE 94xx é genérico e não discrimina entre atividade econômica e associativismo puro. Isso afeta especialmente os 1.795 registros da variável independente — a ausência de indicativo econômico no CNPJ não significa ausência de atividade econômica real.",
+    team_title: "Envolvidos no projeto",
+    team_sub: "Equipe responsável pela orientação, construção do banco e desenvolvimento do site. Links para os currículos Lattes.",
+    team_lbl: "Equipe",
+    team_role_coord: "Coordenador do projeto",
+    team_role_researcher: "Pesquisador",
+    team_role_researcher_f: "Pesquisadora",
+    team_lattes: "Acessar Lattes",
+    footer_title: "EEPI · Empreendimentos Econômicos em Povos Indígenas",
+    footer_data: "Dados: Receita Federal / minhareceita.org",
+    footer_team: "Equipe:",
+  },
+  en: {
+    hero_title: "Economic<br><em>Enterprises</em> in<br>Indigenous Peoples",
+    hero_sub: "Database built from Brazil’s CNPJ (Federal Revenue) records, classified by economic activity and relevance level. Universe: Indigenous Lands in Brazil.",
+    kpi_cnpjs: "CNPJs analyzed",
+    kpi_econ: "Economic enterprises",
+    kpi_assoc: "Associations (independent var.)",
+    kpi_ufs: "States covered",
+    nav_about: "About",
+    nav_overview: "Overview",
+    nav_econ: "Economic",
+    nav_nonecon: "Non-economic",
+    nav_assoc: "Associations",
+    nav_geo: "Geographic distribution",
+    nav_method: "Methodology",
+    nav_team: "Team",
+    about_title: "About the site and data",
+    about_sub: "This dashboard presents descriptive statistics of the EEPI database (Economic Enterprises with Indigenous Participation), built from CNPJ (Federal Revenue) records. The goal is to support the research, organize results, and make methodological decisions transparent.",
+    about_what_title: "What this site shows",
+    about_what_body: "The sections below summarize the EEPI database in four dimensions: overall composition (categories and relevance levels), profile of enterprises classified as economic (dependent variable), profile of non-economic records and associations (independent variable), and state-level distribution.",
+    about_use_title: "How to use / interpret",
+    about_use_body: "This dataset describes <strong>CNPJ formalization</strong> and a methodological classification based on signals and CNAE. It should not be interpreted as a perfect measure of real on-the-ground Indigenous economic activity, nor as individual proof of ethnicity.<br><br>Detailed sources, criteria, and construction steps are in <strong>Methodology notes</strong>.",
+    overview_title: "Database overview",
+    overview_sub: "2,705 CNPJs distributed into categories under the project’s methodological criteria.",
+    card_total_lbl: "Total analyzed",
+    card_total_det: "High · Very High · Medium (conf.) · Medium (prob.)",
+    card_eco_lbl: "Economic",
+    card_eco_det: "17.3% of dataset · 397 active",
+    card_nao_lbl: "Non-economic",
+    card_nao_det: "74.9% of dataset · 1,650 active",
+    card_ass_lbl: "Associations (independent var.)",
+    card_ass_det: "Subset of Non-economic",
+    comp_title: "Dataset composition",
+    comp_eco: "Economic (468)",
+    comp_nao: "Non-economic (2,026)",
+    ov_lvl_title: "By relevance level",
+    ov_reg_title: "Economic by region",
+    eco_title: "Economic enterprises",
+    eco_sub: "468 CNPJs with a productive main CNAE and/or an economic secondary CNAE confirmed. Dependent variable of the research.",
+    eco_kpi_active_lbl: "Active",
+    eco_kpi_inapt_lbl: "Inactive (inapt)",
+    eco_kpi_susp_lbl: "Suspended",
+    eco_nat_title: "Legal nature",
+    eco_cnae_title: "Top 10 main CNAE",
+    eco_sec_title: "Most frequent secondary CNAEs",
+    eco_sec_sub: "Activities registered beyond the main CNAE — purely associative CNAEs (9493/9499) excluded",
+    eco_uf_title: "Economic by state (UF)",
+    nao_title: "Non-economic",
+    nao_sub: "2,026 CNPJs whose main and secondary CNAEs do not indicate economic activity — schools, councils, churches, rights-defense associations, etc.",
+    nao_cnae_title: "Main CNAE",
+    nao_nat_title: "Legal nature",
+    nao_uf_title: "Non-economic by state — top 10",
+    ass_title: "Associations — independent variable",
+    ass_sub: "1,795 Indigenous civil society organizations. Subset of the “non-economic” group, used as the independent variable in the research.",
+    ass_nat_title: "Legal nature",
+    ass_reg_title: "By region",
+    geo_title: "Geographic distribution",
+    geo_sub: "Amazonas leads with 99 economic records (21.2%), followed by Pará (14.5%) and São Paulo (10.9%).",
+    pill_eco: "Economic",
+    pill_nao: "Non-economic",
+    pill_ass: "Associations",
+    geo_less: "Less",
+    geo_more: "More",
+    geo_leg_eco: "Economic by state",
+    geo_tbl_eco_title: "Economic — all states",
+    geo_tbl_nao_title: "Non-economic — top 10 states",
+    th_uf: "State",
+    th_qtd: "Count",
+    metod_title: "Methodology notes",
+    metod_sub: "Classification criteria, sources, and decisions documented throughout the dataset construction.",
+    metod_def_title: "What are EEPIs (operational definition)",
+    metod_def_body: "In this project, we define <strong>Economic Enterprises with Indigenous Participation (EEPI)</strong> as CNPJs that show <strong>evidence of Indigenous participation/identity</strong> (through registry signals such as specific legal nature, unambiguous terms, or ethnonyms in the corporate name) and that additionally show <strong>evidence of economic activity</strong> in the main CNAE <em>or</em> in secondary CNAEs.<br><br>The “EEPI” category is intentionally <strong>flexible</strong> to capture organizational formats common in Brazil (e.g., associations that organize production and commercialization while keeping a 94xx associative main CNAE).",
+    metod_tinteco_title: "What is TintecoV1 (Indigenous Lands base)",
+    metod_tinteco_body: "<strong>TintecoV1</strong> is a spreadsheet maintained by the research group that organizes a <strong>representative sample of 250 Indigenous Lands (TIs)</strong>, designed to support inference over the universe of TIs registered by FUNAI (2019 base). Each TI may intersect one or more municipalities; when municipalities are expanded from the sample, they provide a <strong>geographic frame</strong> used to cross-reference CNPJ records.<br><br>A dedicated TintecoV1 page (variables and sampling design) is planned for future integration.",
+    metod_pipeline_title: "How the dataset was built (step by step)",
+    metod_pipeline_sub: "The dataset construction followed a conservative workflow prioritizing traceability and reducing false positives:",
+    pipe_1_lbl: "1) Municipalities",
+    pipe_1_body: "Extract and normalize municipalities associated with the 250 sampled TIs (TintecoV1) and map them to the Federal Revenue municipality code.",
+    pipe_2_lbl: "2) Filtering",
+    pipe_2_body: "Search CNPJ open data for records with signals of Indigenous identity/participation (unambiguous terms, ethnonyms, specific legal nature) and located in municipalities from the sample.",
+    pipe_3_lbl: "3) Scoring",
+    pipe_3_body: "Apply a hierarchical scoring system: stronger criteria count more; ambiguous signals alone never include a record.",
+    pipe_4_lbl: "4) Enrichment",
+    pipe_4_body: "Enrich and standardize data via API (registration status, structured secondary CNAEs, address, QSA when available) with caching and rate limiting.",
+    pipe_5_lbl: "5) Economic criterion",
+    pipe_5_body: "Methodological criterion: a record is classified as <strong>Economic</strong> if there is an economic indicator in the main CNAE <em>or</em> secondary CNAEs. If it is 94xx with no economic CNAE, it is classified as <strong>Associations</strong> (independent variable).",
+    metod_crit_title: "Classification criterion",
+    metod_crit_body: "<strong style=\"color:var(--eco)\">Dependent variable:</strong> CNPJs with economic main CNAE and a secondary CNAE confirming productive activity.<br><br><strong style=\"color:var(--ass)\">Independent variable:</strong> Indigenous civil society associations — 94xx CNAE with no economic indicator.<br><br><strong>Note:</strong> the public dashboard shows only the consolidated sets used in the main analysis.",
+    metod_source_title: "Source and process",
+    metod_src_lbl: "Source",
+    metod_src_body: "Federal Revenue via minhareceita.org",
+    metod_univ_lbl: "Universe",
+    metod_univ_body: "CNPJs associated with Indigenous Lands",
+    metod_lvls_lbl: "Levels",
+    metod_lvls_body: "High · Very High · Medium (conf.) · Medium (prob.)",
+    metod_cls_lbl: "Classification",
+    metod_cls_body: "CNAE + corporate-name scoring algorithm",
+    metod_qsa_lbl: "Partners (Very High)",
+    metod_qsa_body: "API returns empty QSA — Indigenous orgs often do not register boards in the Federal Revenue registry",
+    metod_lim: "<strong>Structural limitation:</strong> CNPJs of Indigenous organizations are chronically under-registered. The 94xx CNAE is generic and does not discriminate between economic activity and purely associative purposes. This affects especially the 1,795 records of the independent variable — the absence of an economic indicator in the CNPJ does not imply absence of real economic activity.",
+    team_title: "Project team",
+    team_sub: "Team responsible for research supervision, dataset construction, and website development. Links to Lattes CVs.",
+    team_lbl: "Team",
+    team_role_coord: "Project coordinator",
+    team_role_researcher: "Researcher",
+    team_role_researcher_f: "Researcher",
+    team_lattes: "Open Lattes",
+    footer_title: "EEPI · Economic Enterprises in Indigenous Peoples",
+    footer_data: "Data: Federal Revenue / minhareceita.org",
+    footer_team: "Team:",
+  }
+};
+
+function setLang(lang) {
+  const L = I18N[lang] || I18N.pt;
+  LANG = (lang === 'en') ? 'en' : 'pt';
+  document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'pt-BR');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = L[key];
+    if (typeof val === 'string') el.innerHTML = val;
+  });
+  const btn = document.getElementById('langbtn');
+  if (btn) btn.textContent = (lang === 'en') ? 'PT' : 'EN';
+  localStorage.setItem('eepi_lang', lang);
+  // rebuild charts with translated labels
+  buildCharts(LANG);
+  // rebuild bars (lists) with translated labels
+  buildBars(LANG);
+  // rerender map legend/tooltip language
+  renderMapa(mapaAtual);
+}
+
+(() => {
+  const qp = new URLSearchParams(location.search);
+  const urlLang = (qp.get('lang') || '').toLowerCase();
+  const saved = localStorage.getItem('eepi_lang') || '';
+  const initial = urlLang || saved || 'pt';
+  setLang(initial === 'en' ? 'en' : 'pt');
+  const btn = document.getElementById('langbtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const cur = localStorage.getItem('eepi_lang') || 'pt';
+      setLang(cur === 'en' ? 'pt' : 'en');
+    });
+  }
+})();
+</script>
+</body>
+</html>

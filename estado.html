@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EEPI — Lista por estado</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="./dados/eepi_consolidado_v2.js"></script>
+  <style>
+    :root {
+      --terra:#7B3A10;--ocre:#B5521E;--palha:#F2E8D5;--areia:#E0CBA8;
+      --folha:#2D5A27;--noite:#16100A;--cinza:#6B5B4E;--branco:#FAF7F0;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'IBM Plex Sans',sans-serif;background:var(--branco);color:var(--noite);}
+    header{background:var(--noite);padding:28px 28px 22px;position:relative;overflow:hidden;}
+    header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--terra),var(--ocre),#D4855A,var(--ocre),var(--terra));}
+    .wrap{max-width:980px;margin:0 auto;}
+    .hlbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ocre);margin-bottom:10px;}
+    h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--palha);line-height:1.1;}
+    .sub{color:#8B7560;font-size:13px;margin-top:8px;line-height:1.6;}
+    main{max-width:980px;margin:0 auto;padding:24px 28px 64px;}
+    .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;}
+    .back{font-size:12px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none;color:var(--terra);font-weight:600;}
+    .back:hover{text-decoration:underline;}
+    .meta{font-size:12px;color:var(--cinza);}
+    .card{background:#fff;border:1px solid var(--areia);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+    .lbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cinza);margin-bottom:8px;}
+    .search{width:100%;max-width:420px;border:1px solid var(--areia);border-radius:8px;padding:10px 12px;font-size:13px;background:#fff;}
+    .tb{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--areia);border-radius:12px;overflow:hidden;}
+    .tb th{text-align:left;padding:10px 12px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cinza);border-bottom:1px solid var(--areia);font-weight:500;background:#FCFAF6;}
+    .tb td{padding:10px 12px;border-bottom:1px solid #F5F0E8;vertical-align:top;}
+    .tb tr:last-child td{border-bottom:none;}
+    .pill{display:inline-block;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--palha);border:1px solid var(--areia);color:var(--terra);font-weight:600;}
+    .muted{color:var(--cinza);}
+    .err{color:#7B1F1F;font-size:13px;line-height:1.7;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="hlbl" data-i18n="hlbl">EEPI · Lista por estado</div>
+      <h1 id="t1">Estado</h1>
+      <p class="sub" data-i18n="sub">Listagem de EEPIs para o estado selecionado no mapa.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="topbar">
+      <a class="back" id="backLink" href="./EEPI_SITE.html" data-i18n="back">← Voltar ao painel</a>
+      <span class="meta" id="meta"></span>
+    </div>
+
+    <div class="card">
+      <div class="lbl" data-i18n="filter_lbl">Filtro</div>
+      <input class="search" id="q" placeholder="Buscar por nome, cidade, subcategoria…" />
+      <div class="meta" style="margin-top:10px;" id="count"></div>
+    </div>
+
+    <div id="out"></div>
+  </main>
+
+  <script>
+    const UF_NOME = {AC:'Acre',AL:'Alagoas',AM:'Amazonas',AP:'Amapá',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MG:'Minas Gerais',MS:'Mato Grosso do Sul',MT:'Mato Grosso',PA:'Pará',PB:'Paraíba',PE:'Pernambuco',PI:'Piauí',PR:'Paraná',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RO:'Rondônia',RR:'Roraima',RS:'Rio Grande do Sul',SC:'Santa Catarina',SE:'Sergipe',SP:'São Paulo',TO:'Tocantins'};
+
+    const params = new URLSearchParams(location.search);
+    const uf = (params.get('uf') || '').toUpperCase().trim();
+    const tipoInicial = (params.get('tipo') || 'eco').toLowerCase().trim(); // eco | nao | ass
+
+    const I18N = {
+      pt: {
+        hlbl: 'EEPI · Lista por estado',
+        sub: 'Listagem de EEPIs para o estado selecionado no mapa.',
+        back: '← Voltar ao painel',
+        filter_lbl: 'Filtro',
+        search_placeholder: 'Buscar por nome, cidade, subcategoria…',
+        no_records: 'Nenhum registro nesta categoria para este estado.',
+        table_th1: 'Razão social',
+        table_th2: 'Município',
+        table_th3: 'CNAE principal',
+        table_th4: 'Situação',
+        count_prefix: 'Resultados no estado:',
+        pill_eco: 'Econômico',
+        pill_nao: 'Não econômico',
+        pill_ass: 'Associações'
+      },
+      en: {
+        hlbl: 'EEPI · List by state',
+        sub: 'Listing of EEPIs for the state selected on the map.',
+        back: '← Back to dashboard',
+        filter_lbl: 'Filter',
+        search_placeholder: 'Search by name, city, subcategory…',
+        no_records: 'No records in this category for this state.',
+        table_th1: 'Corporate name',
+        table_th2: 'Municipality',
+        table_th3: 'Main CNAE',
+        table_th4: 'Status',
+        count_prefix: 'Results in state:',
+        pill_eco: 'Economic',
+        pill_nao: 'Non-economic',
+        pill_ass: 'Associations'
+      }
+    };
+
+    const urlLang = (params.get('lang') || '').toLowerCase();
+    const savedLang = (localStorage.getItem('eepi_lang') || '').toLowerCase();
+    const LANG = (urlLang || savedLang || 'pt') === 'en' ? 'en' : 'pt';
+    localStorage.setItem('eepi_lang', LANG);
+    let L = I18N[LANG];
+
+    function setLang(lang) {
+      L = I18N[lang] || I18N.pt;
+      document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'pt-BR');
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (key && L[key]) el.innerHTML = L[key];
+      });
+      const qel = document.getElementById('q');
+      if (qel) qel.placeholder = L.search_placeholder;
+      const back = document.getElementById('backLink');
+      if (back) { back.textContent = L.back; back.href = `./EEPI_SITE.html?lang=${encodeURIComponent(lang)}`; }
+      localStorage.setItem('eepi_lang', lang);
+    }
+
+    setLang(LANG);
+
+    const title = uf && UF_NOME[uf] ? `${UF_NOME[uf]} (${uf})` : (uf ? `${LANG==='en' ? 'State' : 'Estado'} ${uf}` : (LANG==='en' ? 'State' : 'Estado'));
+    document.getElementById('t1').textContent = title;
+    document.getElementById('meta').textContent = uf ? `${LANG==='en' ? 'Selected state' : 'UF selecionada'}: ${uf}` : '';
+
+    const DATA_PATH = './dados/eepi_consolidado_v2.json';
+
+    const out = document.getElementById('out');
+    const q = document.getElementById('q');
+    const count = document.getElementById('count');
+
+    function norm(s){ return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+    function filtrarTexto(rows) {
+      const qq = norm(q.value);
+      if (!qq) return rows;
+      return rows.filter(r => {
+        const blob = norm([
+          r.razao_social,
+          r.nome_fantasia,
+          r.nome_municipio,
+          r.uf,
+          r.natureza_descricao,
+          r.cnae_descricao,
+          r.cnaes_secundarios_estruturados,
+          r.situacao_label
+        ].join(' '));
+        return blob.includes(qq);
+      });
+    }
+
+    function tabela(rows, label) {
+      if (!rows.length) {
+        return `<div class="card"><div class="lbl">${label}</div><p class="err">${L.no_records}</p></div>`;
+      }
+      return `
+        <div class="card">
+          <div class="lbl">${label}</div>
+          <table class="tb">
+            <thead>
+              <tr>
+                <th>${L.table_th1}</th>
+                <th>${L.table_th2}</th>
+                <th>${L.table_th3}</th>
+                <th>${L.table_th4}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr>
+                  <td><strong>${r.razao_social || ''}</strong>${r.cnpj_completo ? `<div class="muted" style="margin-top:4px;">${r.cnpj_completo}</div>` : ''}</td>
+                  <td>${r.nome_municipio || '<span class="muted">—</span>'}</td>
+                  <td>${(r.cnae_principal ? `<span class="pill">${r.cnae_principal}</span>` : '')} ${r.cnae_descricao ? `<span class="muted">${r.cnae_descricao}</span>` : '<span class="muted">—</span>'}</td>
+                  <td>${r.situacao_label || '<span class="muted">—</span>'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function pills(active, counts) {
+      const mk = (id, txt) => `<button class="pill" data-tab="${id}" style="cursor:pointer;${active===id?'outline:2px solid var(--terra);':''}">${txt} <span class="muted">(${counts[id]||0})</span></button>`;
+      return `<div class="card" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${mk('eco',L.pill_eco)}
+        ${mk('nao',L.pill_nao)}
+        ${mk('ass',L.pill_ass)}
+      </div>`;
+    }
+
+    function renderAll(data, activeTab) {
+      const ecoAll = (data.economico || []).filter(r => !uf || (r.uf || '').toUpperCase().trim() === uf);
+      const naoAll = (data.nao_economico || []).filter(r => !uf || (r.uf || '').toUpperCase().trim() === uf);
+      const assAll = (data.associacoes || []).filter(r => !uf || (r.uf || '').toUpperCase().trim() === uf);
+
+      const eco = filtrarTexto(ecoAll);
+      const nao = filtrarTexto(naoAll);
+      const ass = filtrarTexto(assAll);
+
+      const counts = { eco: ecoAll.length, nao: naoAll.length, ass: assAll.length };
+      count.textContent = `${L.count_prefix} ${L.pill_eco} ${eco.length}/${ecoAll.length} · ${L.pill_nao} ${nao.length}/${naoAll.length} · ${L.pill_ass} ${ass.length}/${assAll.length}`;
+
+      const htmlTabs = pills(activeTab, counts);
+      const body = activeTab === 'eco'
+        ? tabela(eco, 'Econômico')
+        : activeTab === 'nao'
+          ? tabela(nao, 'Não econômico')
+          : tabela(ass, 'Associações');
+
+      out.innerHTML = htmlTabs + body;
+      out.querySelectorAll('button[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.getAttribute('data-tab');
+          renderAll(data, tab);
+        });
+      });
+    }
+
+    const data = window.EEPI_CONSOLIDADO_V2;
+    if (!data) {
+      out.innerHTML = `<p class="err">Não foi possível carregar os dados do estado. Verifique se o arquivo <span class="pill">./dados/eepi_consolidado_v2.js</span> está ao lado do site.</p>`;
+    } else {
+      const tab = ['eco','nao','ass'].includes(tipoInicial) ? tipoInicial : 'eco';
+      renderAll(data, tab);
+      q.addEventListener('input', () => {
+        const current = (out.querySelector('button[data-tab][style*=\"outline\"]')?.getAttribute('data-tab')) || tab;
+        renderAll(data, current);
+      });
+    }
+  </script>
+</body>
+</html>
