@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EEPI — Empreendimentos Econômicos em Povos Indígenas</title>
+<title>EEPI — Empreendimentos Econômicos com Participação Indígena</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
@@ -44,9 +44,18 @@ nav .nav-toggle span::after{top:10px;}
 nav.nav-open .nav-toggle span{background:transparent;}
 nav.nav-open .nav-toggle span::before{transform:translateY(10px) rotate(45deg);}
 nav.nav-open .nav-toggle span::after{transform:translateY(-10px) rotate(-45deg);}
-.ni{max-width:1180px;margin:0 auto;display:flex;gap:0;}
-nav a{padding:16px 20px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;color:var(--cinza);border-bottom:2px solid transparent;transition:all .2s;font-weight:500;}
+.ni{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 2px;}
+nav a{padding:14px 12px;font-size:11px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;color:var(--cinza);border-bottom:2px solid transparent;transition:all .2s;font-weight:500;white-space:nowrap;}
 nav a:hover,nav a.on{color:var(--terra);border-bottom-color:var(--terra);}
+.navdrop{position:relative;display:flex;align-items:stretch;}
+.navdrop-trig{display:inline-flex;align-items:center;gap:5px;}
+.navdrop-trig::after{content:'▾';font-size:9px;opacity:.75;transition:transform .2s ease;}
+.navdrop:hover .navdrop-trig::after,.navdrop:focus-within .navdrop-trig::after{transform:rotate(180deg);}
+.navdrop-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(8px);min-width:220px;background:var(--palha);border:1px solid var(--areia);border-radius:12px;box-shadow:0 16px 36px rgba(26,16,10,.17);padding:7px;display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transition:opacity .18s ease,transform .18s ease;z-index:130;}
+.navdrop:hover .navdrop-menu,.navdrop:focus-within .navdrop-menu{opacity:1;visibility:visible;transform:translateX(-50%) translateY(2px);}
+.navdrop-menu a{border-bottom:none !important;border-radius:8px;padding:10px 14px;white-space:nowrap;letter-spacing:1px;}
+.navdrop-menu a:hover,.navdrop-menu a.on{background:rgba(123,58,16,.07);color:var(--terra);border-bottom-color:transparent;}
+.navdrop:has(.navdrop-menu a.on) > .navdrop-trig{color:var(--terra);border-bottom-color:var(--terra);}
 
 main{max-width:1180px;margin:0 auto;padding:48px 48px 80px;}
 .sec{margin-bottom:72px;scroll-margin-top:70px;}
@@ -172,6 +181,12 @@ hr.div{border:none;border-top:1px solid var(--areia);margin-bottom:28px;}
     padding-left: 24px;
   }
   nav a:last-child { border-bottom: none; }
+  .ni .langbtn { align-self: center; margin: 12px 0 14px; }
+  .navdrop { display: block; width: 100%; position: static; }
+  .navdrop-trig { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+  .navdrop-menu { position: static; opacity: 1; visibility: visible; transform: none; display: flex; box-shadow: none; border: none; border-radius: 0; padding: 0; min-width: 0; gap: 0; background: rgba(123,58,16,0.03); }
+  .navdrop-menu a { padding-left: 38px !important; font-size: 11px; }
+  .navdrop:hover .navdrop-menu, .navdrop:focus-within .navdrop-menu { transform: none; }
 
   /* Reduzido o padding do topo do conteúdo (main) para eliminar o buraco em branco */
   main { 
@@ -186,7 +201,7 @@ hr.div{border:none;border-top:1px solid var(--areia);margin-bottom:28px;}
   .mleg-mini { gap: 10px; }
   .pill { padding: 6px 10px; font-size: 10px; }
   .pills { gap: 6px; }
-  #mapa-svg { height: 260px; }
+  #mapa-svg, #mapa-cnae-svg { height: 260px; }
   .mtt { font-size: 10px; padding: 6px 10px; }
   .tb th, .tb td { padding: 8px 10px; font-size: 11px; }
   footer { padding: 24px 18px; }
@@ -216,8 +231,10 @@ hr.div{border:none;border-top:1px solid var(--areia);margin-bottom:28px;}
   .cards { grid-template-columns: 1fr; }
   .g2, .g3 { gap: 18px; }
   .blk { padding: 16px; }
-  .mleg { flex-direction: column; align-items: flex-start; }
-  .mleg span { width: 100%; }
+  .mleg { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; }
+  .mleg span { width: auto; }
+  .mleg .lrect { width: 14px; height: 8px; }
+  #mleg-txt, #mleg-cnae-txt { margin-left: 0 !important; flex-basis: 100%; text-align: center; }
   .tb th, .tb td { font-size: 11px; }
   .mtt { white-space: normal; max-width: 180px; }
   footer { padding: 18px 14px 22px; font-size: 11px; }
@@ -243,10 +260,25 @@ hr.div{border:none;border-top:1px solid var(--areia);margin-bottom:28px;}
 .pill-ass{background:var(--ass-bg);color:var(--ass);border-color:var(--ass-lt);}
 .pill.on{box-shadow:0 0 0 2px currentColor;}
 
-#mapa-wrap{position:relative;}
-#mapa-svg{width:100%;height:420px;display:block;}
+#mapa-wrap,#mapa-cnae-wrap{position:relative;}
+#mapa-svg,#mapa-cnae-svg{width:100%;height:420px;display:block;}
 .mtt{position:absolute;background:var(--noite);color:var(--palha);padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:10;}
-.mleg{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--cinza);margin-top:8px;}
+.mleg{display:flex;gap:6px 8px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--cinza);margin-top:8px;}
+.mleg-grad{display:inline-flex;gap:3px;align-items:center;}
+.pill-cnae{background:var(--eco-bg);color:var(--eco);border-color:var(--eco-lt);}
+.cnae-sel-wrap{margin-bottom:16px;}
+.cnae-select{width:100%;max-width:560px;font-family:inherit;font-size:13px;color:var(--eco);background:var(--eco-bg);border:1.5px solid var(--eco-lt);border-radius:10px;padding:9px 12px;cursor:pointer;outline:none;}
+.cnae-select:focus{box-shadow:0 0 0 2px var(--eco-lt);}
+.cnae-sel-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.cnae-sel-col{flex:1 1 240px;min-width:200px;display:flex;flex-direction:column;gap:5px;}
+.cnae-sel-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--cinza);}
+.cnae-sel-col .cnae-select{max-width:none;width:100%;}
+@media (max-width: 620px) {
+  .cnae-sel-row{gap:10px;margin-bottom:14px;}
+  .cnae-sel-col{flex:1 1 100%;min-width:0;width:100%;}
+  .cnae-select{font-size:16px;padding:11px 12px;max-width:none;width:100%;}
+  .cnae-sel-lbl{font-size:11px;}
+}
 .lrect{width:18px;height:10px;border-radius:2px;display:inline-block;}
 
 .nota{background:var(--rev-bg);border-left:3px solid var(--rev);border-radius:0 8px 8px 0;padding:14px 18px;font-size:13px;color:#5A3C08;line-height:1.7;margin-top:20px;}
@@ -268,13 +300,16 @@ footer span{color:#6B5040;}
   .footer-links{gap:0;}
 }
 
-.langbtn{position:absolute;top:18px;right:18px;border:1px solid #2E1E10;background:rgba(242,232,213,.06);color:var(--palha);border-radius:999px;padding:8px 12px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(6px);z-index: 2200;}
-.langbtn:hover{border-color:rgba(181,82,30,.65);color:var(--ocre);}
+.langbtn{display:inline-flex;align-items:center;justify-content:center;gap:0;align-self:center;margin-left:6px;border:1px solid var(--areia);background:transparent;color:var(--terra);border-radius:999px;padding:6px;cursor:pointer;transition:all .2s;line-height:0;}
+.langbtn-globe{flex:none;display:block;}
+.langbtn-code{display:inline-block;}
+.langbtn:hover{border-color:var(--terra);background:var(--terra);color:var(--palha);}
 
 .equipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
 .pessoa{border:1px solid var(--areia);border-radius:10px;padding:16px 16px;background:#fff;display:flex;flex-direction:column;gap:8px;}
 .pnome{font-weight:600;color:var(--noite);line-height:1.3;}
 .pcargo{font-size:12px;color:var(--cinza);}
+.pafil{font-size:11px;color:var(--cinza);font-style:italic;}
 .plnk{font-size:12px;text-decoration:none;color:var(--terra);font-weight:500;display:inline-flex;align-items:center;gap:8px;}
 .plnk:hover{text-decoration:underline;}
 </style>
@@ -282,13 +317,12 @@ footer span{color:#6B5040;}
 <body>
 
 <header>
-<button class="langbtn" id="langbtn" type="button">EN</button>
 <div class="hi">
-  <h1 data-i18n="hero_title">Empreendimentos<br><em>Econômicos</em> em<br>Povos Indígenas</h1>
-  <p class="hsub" data-i18n="hero_sub">Banco de dados construído a partir de registros no CNPJ/Receita Federal, com classificação por atividade econômica e nível de relevância. Universo: terras indígenas brasileiras.</p>
+  <h1 data-i18n="hero_title">Empreendimentos<br><em>Econômicos</em> com<br>Participação Indígena</h1>
+  <p class="hsub" data-i18n="hero_sub">Banco de dados construído a partir de registros no CNPJ/Receita Federal, com classificação por atividade econômica e nível de relevância. Amostra: 238 terras indígenas localizadas em 236 municípios, provenientes da base de dados Tinteco.</p>
   <div class="hmeta">
     <div class="hmi"><span class="hmn">2.705</span><span class="hml" data-i18n="kpi_cnpjs">CNPJs analisados</span></div>
-    <div class="hmi"><span class="hmn">468</span><span class="hml" data-i18n="kpi_econ">Empreendimentos econômicos</span></div>
+    <div class="hmi"><span class="hmn">360</span><span class="hml" data-i18n="kpi_econ">Empreendimentos econômicos</span></div>
     <div class="hmi"><span class="hmn">1.795</span><span class="hml" data-i18n="kpi_assoc">Associações (var. independente)</span></div>
     <div class="hmi"><span class="hmn">23</span><span class="hml" data-i18n="kpi_ufs">UFs representadas</span></div>
   </div>
@@ -300,12 +334,21 @@ footer span{color:#6B5040;}
 <div class="ni">
   <a href="#sobre" class="on" data-i18n="nav_about">Sobre</a>
   <a href="#geral" data-i18n="nav_overview">Visão geral</a>
-  <a href="#eco" data-i18n="nav_econ">Econômicos</a>
+  <div class="navdrop">
+  <a href="#eco" class="navdrop-trig" data-i18n="nav_econ">Econômicos</a>
+  <div class="navdrop-menu">
+  <a href="#eco" data-i18n="nav_econ_all">Visão econômica</a>
+  <a href="#eco-assoc" data-i18n="nav_econ_assoc">Associações privadas</a>
+  <a href="#eco-coop" data-i18n="nav_econ_coop">Cooperativas</a>
+  </div>
+  </div>
+  <a href="#cnae-reg" data-i18n="nav_cnae_reg">CNAE por região</a>
   <a href="#nao" data-i18n="nav_nonecon">Não econômicos</a>
   <a href="#ass" data-i18n="nav_assoc">Associações</a>
   <a href="#geo" data-i18n="nav_geo">Distribuição geográfica</a>
   <a href="#metod" data-i18n="nav_method">Metodologia</a>
   <a href="#equipe" data-i18n="nav_team">Equipe</a>
+  <button class="langbtn" id="langbtn" type="button" aria-label="Trocar idioma / Switch language"><svg class="langbtn-globe" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg></button>
 </div>
 </nav>
 
@@ -344,16 +387,16 @@ footer span{color:#6B5040;}
 <p class="ssub" data-i18n="overview_sub">2.705 CNPJs distribuídos em categorias conforme critério metodológico da pesquisa.</p>
 <hr class="div">
 <div class="cards">
-  <div class="card"><span class="clbl" data-i18n="card_total_lbl">Total analisado</span><span class="cnum">2.705</span><span class="cdet" data-i18n="card_total_det">Alto · Muito Alto · Médio Conf. · Médio Prov.</span></div>
-  <div class="card eco"><span class="clbl" data-i18n="card_eco_lbl">Econômico</span><span class="cnum">468</span><span class="cdet" data-i18n="card_eco_det">17,3% do banco · 397 ativas</span></div>
-  <div class="card nao"><span class="clbl" data-i18n="card_nao_lbl">Não econômico</span><span class="cnum">2.026</span><span class="cdet" data-i18n="card_nao_det">74,9% do banco · 1.650 ativas</span></div>
+  <div class="card"><span class="clbl" data-i18n="card_total_lbl">Total analisado</span><span class="cnum">2.705</span><span class="cdet" data-i18n="card_total_det">Alto · Muito Alto · Médio</span></div>
+  <div class="card eco"><span class="clbl" data-i18n="card_eco_lbl">Econômico</span><span class="cnum">360</span><span class="cdet" data-i18n="card_eco_det">13,3% do banco · 316 ativas</span></div>
+  <div class="card nao"><span class="clbl" data-i18n="card_nao_lbl">Não econômico</span><span class="cnum">2.134</span><span class="cdet" data-i18n="card_nao_det">78,9% do banco · 1.731 ativas</span></div>
   <div class="card ass"><span class="clbl" data-i18n="card_ass_lbl">Associações (var. independente)</span><span class="cnum">1.795</span><span class="cdet" data-i18n="card_ass_det">Subconjunto do Não Econômico</span></div>
 </div>
 <div class="blk" style="margin-bottom:28px;">
   <div class="btit" data-i18n="comp_title">Composição do banco</div>
   <div class="mleg-mini">
-    <span class="mli"><span class="mlsq" style="background:#2D5A27"></span><span data-i18n="comp_eco">Econômico (468)</span></span>
-    <span class="mli"><span class="mlsq" style="background:#7B1F1F"></span><span data-i18n="comp_nao">Não Econômico (2.026)</span></span>
+    <span class="mli"><span class="mlsq" style="background:#2D5A27"></span><span data-i18n="comp_eco">Econômico (360)</span></span>
+    <span class="mli"><span class="mlsq" style="background:#7B1F1F"></span><span data-i18n="comp_nao">Não Econômico (2.134)</span></span>
   </div>
   <div style="height:90px;"><canvas id="ch-prop"></canvas></div>
 </div>
@@ -366,12 +409,12 @@ footer span{color:#6B5040;}
 <!-- ECONÔMICO -->
 <section class="sec" id="eco">
 <h2 class="stit" data-i18n="eco_title">Empreendimentos econômicos</h2>
-<p class="ssub" data-i18n="eco_sub">468 CNPJs com CNAE principal de atividade produtiva e/ou CNAE secundário econômico confirmado. Variável dependente da pesquisa.</p>
+<p class="ssub" data-i18n="eco_sub">360 CNPJs com CNAE principal de atividade produtiva e/ou CNAE secundário econômico confirmado (após exclusão de 108 falsos-positivos). Variável dependente da pesquisa.</p>
 <hr class="div">
 <div class="g3">
-  <div class="card eco"><span class="clbl" data-i18n="eco_kpi_active_lbl">Ativas</span><span class="cnum">397</span><span class="cdet">84,8%</span></div>
-  <div class="card"><span class="clbl" data-i18n="eco_kpi_inapt_lbl">Inaptas</span><span class="cnum" style="color:var(--nao)">69</span><span class="cdet">14,7%</span></div>
-  <div class="card"><span class="clbl" data-i18n="eco_kpi_susp_lbl">Suspensas</span><span class="cnum" style="color:var(--rev)">2</span><span class="cdet">0,4%</span></div>
+  <div class="card eco"><span class="clbl" data-i18n="eco_kpi_active_lbl">Ativas</span><span class="cnum">316</span><span class="cdet">87,8%</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_inapt_lbl">Inaptas</span><span class="cnum" style="color:var(--nao)">44</span><span class="cdet">12,2%</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_susp_lbl">Suspensas</span><span class="cnum" style="color:var(--rev)">0</span><span class="cdet">0,0%</span></div>
 </div>
 <div class="g2">
   <div class="blk"><div class="btit" data-i18n="eco_nat_title">Natureza jurídica</div><div class="bh" id="bh-nat-eco"></div></div>
@@ -388,10 +431,61 @@ footer span{color:#6B5040;}
 </div>
 </section>
 
+<!-- ECONÔMICO · ASSOCIAÇÕES PRIVADAS -->
+<section class="sec" id="eco-assoc">
+<h2 class="stit" data-i18n="ecoassoc_title">Econômicos · Associações privadas</h2>
+<p class="ssub" data-i18n="ecoassoc_sub">253 dos 360 empreendimentos econômicos (70,3%) são associações privadas — predominam atividades de representação e defesa de direitos, com forte presença produtiva como CNAE secundário.</p>
+<hr class="div">
+<div class="g3">
+  <div class="card eco"><span class="clbl" data-i18n="grp_total_lbl">Total no grupo</span><span class="cnum">253</span><span class="cdet" data-i18n="ecoassoc_share">70,3% dos econômicos</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_active_lbl">Ativas</span><span class="cnum">229</span><span class="cdet">90,5%</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_inapt_lbl">Inaptas</span><span class="cnum" style="color:var(--nao)">24</span><span class="cdet">9,5%</span></div>
+</div>
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="grp_pri_title">Ranking de CNAE principal</div><div class="bh" id="bh-pri-assoc"></div></div>
+  <div class="blk"><div class="btit" data-i18n="grp_sec_title">Ranking de CNAE secundário</div><div class="bh" id="bh-sec-assoc"></div></div>
+</div>
+<div class="blk">
+  <div class="btit" data-i18n="grp_reg_title">Distribuição por região</div>
+  <div style="height:240px;"><canvas id="ch-reg-assoc"></canvas></div>
+</div>
+</section>
+
+<!-- ECONÔMICO · COOPERATIVAS -->
+<section class="sec" id="eco-coop">
+<h2 class="stit" data-i18n="ecocoop_title">Econômicos · Cooperativas</h2>
+<p class="ssub" data-i18n="ecocoop_sub">48 dos 360 empreendimentos econômicos (13,3%) são cooperativas — perfil mais produtivo, com CNAEs principais ligados à agropecuária, ao comércio atacadista e ao extrativismo.</p>
+<hr class="div">
+<div class="g3">
+  <div class="card eco"><span class="clbl" data-i18n="grp_total_lbl">Total no grupo</span><span class="cnum">48</span><span class="cdet" data-i18n="ecocoop_share">13,3% dos econômicos</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_active_lbl">Ativas</span><span class="cnum">36</span><span class="cdet">75,0%</span></div>
+  <div class="card"><span class="clbl" data-i18n="eco_kpi_inapt_lbl">Inaptas</span><span class="cnum" style="color:var(--nao)">12</span><span class="cdet">25,0%</span></div>
+</div>
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="grp_pri_title">Ranking de CNAE principal</div><div class="bh" id="bh-pri-coop"></div></div>
+  <div class="blk"><div class="btit" data-i18n="grp_sec_title">Ranking de CNAE secundário</div><div class="bh" id="bh-sec-coop"></div></div>
+</div>
+<div class="blk">
+  <div class="btit" data-i18n="grp_reg_title">Distribuição por região</div>
+  <div style="height:240px;"><canvas id="ch-reg-coop"></canvas></div>
+</div>
+</section>
+
+<!-- CNAE POR REGIÃO -->
+<section class="sec" id="cnae-reg">
+<h2 class="stit" data-i18n="cnaereg_title">CNAE por região</h2>
+<p class="ssub" data-i18n="cnaereg_sub">Distribuição dos principais CNAEs (primários e secundários) dos 360 empreendimentos econômicos entre as cinco regiões. As barras empilhadas mostram a concentração de cada atividade por região.</p>
+<hr class="div">
+<div class="g2">
+  <div class="blk"><div class="btit" data-i18n="cnaereg_pri_title">CNAE principal por região</div><div style="height:340px;"><canvas id="ch-cnaereg-pri"></canvas></div></div>
+  <div class="blk"><div class="btit" data-i18n="cnaereg_sec_title">CNAE secundário por região</div><div style="height:340px;"><canvas id="ch-cnaereg-sec"></canvas></div></div>
+</div>
+</section>
+
 <!-- NÃO ECONÔMICO -->
 <section class="sec" id="nao">
 <h2 class="stit" data-i18n="nao_title">Não econômicos</h2>
-<p class="ssub" data-i18n="nao_sub">2.026 CNPJs cujo CNAE principal e secundário não configuram atividade econômica — escolas, conselhos, igrejas, associações de defesa de direitos etc.</p>
+<p class="ssub" data-i18n="nao_sub">2.134 CNPJs cujo CNAE principal e secundário não configuram atividade econômica — escolas, conselhos, igrejas, associações de defesa de direitos etc. (inclui 108 reclassificados a partir da triagem econômica).</p>
 <hr class="div">
 <div class="g2">
   <div class="blk"><div class="btit" data-i18n="nao_cnae_title">CNAE principal</div><div class="bh" id="bh-cnae-nao"></div></div>
@@ -417,7 +511,7 @@ footer span{color:#6B5040;}
 <!-- GEOGRÁFICO -->
 <section class="sec" id="geo">
 <h2 class="stit" data-i18n="geo_title">Distribuição geográfica</h2>
-<p class="ssub" data-i18n="geo_sub">Amazonas lidera com 99 registros econômicos (21,2%), seguido do Pará (14,5%) e São Paulo (10,9%).</p>
+<p class="ssub" data-i18n="geo_sub">Amazonas lidera com 87 registros econômicos (24,2%), seguido do Pará (16,7%) e Mato Grosso (9,4%).</p>
 <hr class="div">
 <div class="blk" style="margin-bottom:28px;">
   <div class="pills">
@@ -430,8 +524,24 @@ footer span{color:#6B5040;}
     <svg id="mapa-svg" viewBox="0 0 700 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa do Brasil por UF"></svg>
   </div>
   <div class="mleg">
-    <span data-i18n="geo_less">Menos</span><span id="mleg-cores"></span><span data-i18n="geo_more">Mais</span>
+    <span data-i18n="geo_less">Menos</span><span id="mleg-cores" class="mleg-grad"></span><span data-i18n="geo_more">Mais</span>
     <span style="margin-left:16px;" id="mleg-txt" data-i18n="geo_leg_eco">Econômicos por UF</span>
+  </div>
+</div>
+<div class="blk" style="margin-bottom:28px;">
+  <div class="btit" data-i18n="geo_cnae_title">Distribuição por CNAE (econômicos)</div>
+  <p style="font-size:12px;color:var(--cinza);margin-bottom:14px;" data-i18n="geo_cnae_sub">Selecione uma atividade econômica para ver sua distribuição por UF. A cor e o tamanho dos círculos refletem o número de empreendimentos.</p>
+  <div class="cnae-sel-row">
+    <div class="cnae-sel-col"><label class="cnae-sel-lbl" for="sel-grupo" data-i18n="geo_cnae_grp_lbl">Grupo (setor)</label><select id="sel-grupo" class="cnae-select" aria-label="Grupo CNAE"></select></div>
+    <div class="cnae-sel-col"><label class="cnae-sel-lbl" for="sel-cnae" data-i18n="geo_cnae_act_lbl">Atividade (CNAE)</label><select id="sel-cnae" class="cnae-select" aria-label="CNAE"></select></div>
+  </div>
+  <div id="mapa-cnae-wrap">
+    <div class="mtt" id="mtt-cnae"></div>
+    <svg id="mapa-cnae-svg" viewBox="0 0 700 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa do Brasil por CNAE"></svg>
+  </div>
+  <div class="mleg">
+    <span data-i18n="geo_less">Menos</span><span id="mleg-cnae-cores" class="mleg-grad"></span><span data-i18n="geo_more">Mais</span>
+    <span style="margin-left:16px;" id="mleg-cnae-txt"></span>
   </div>
 </div>
 <div class="g2">
@@ -501,7 +611,7 @@ footer span{color:#6B5040;}
     <table class="tb"><tbody>
       <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_src_lbl">Fonte</td><td data-i18n="metod_src_body">Receita Federal via minhareceita.org</td></tr>
       <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_univ_lbl">Universo</td><td data-i18n="metod_univ_body">CNPJs associados a Terras Indígenas</td></tr>
-      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_lvls_lbl">Níveis</td><td data-i18n="metod_lvls_body">Alto · Muito Alto · Médio Conf. · Médio Prov.</td></tr>
+      <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_lvls_lbl">Níveis</td><td data-i18n="metod_lvls_body">Alto · Muito Alto · Médio</td></tr>
       <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_cls_lbl">Classificação</td><td data-i18n="metod_cls_body">Algoritmo de pontuação CNAE + razão social</td></tr>
       <tr><td style="color:var(--cinza);font-size:12px;" data-i18n="metod_qsa_lbl">Sócios (Muito Alto)</td><td data-i18n="metod_qsa_body">API retorna QSA vazio — org. indígenas não registram diretoria na RF</td></tr>
     </tbody></table>
@@ -519,22 +629,23 @@ footer span{color:#6B5040;}
   <div class="btit" data-i18n="team_lbl">Equipe</div>
   <div class="equipe">
     <div class="pessoa">
-      <div class="pnome">Leonardo Barros Soares</div>
+      <div class="pnome">Professor Dr. Leonardo Barros Soares</div>
       <div class="pcargo" data-i18n="team_role_coord">Coordenador do projeto</div>
+      <div class="pafil">Departamento de Ciências Sociais da UFV</div>
       <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K4210013U6" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
     </div>
     <div class="pessoa">
-      <div class="pnome">Pedro Barbosa de Freitas</div>
+      <div class="pnome">Pedro Barbosa de Freitas (Graduação - UFV)</div>
       <div class="pcargo" data-i18n="team_role_researcher">Pesquisador</div>
       <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1111560Z6" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
     </div>
     <div class="pessoa">
-      <div class="pnome">Bruno Eduardo Gomes Gonçalves</div>
+      <div class="pnome">Bruno Eduardo Gomes Gonçalves (Graduação - UFV)</div>
       <div class="pcargo" data-i18n="team_role_researcher">Pesquisador</div>
       <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1580289D7" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
     </div>
     <div class="pessoa">
-      <div class="pnome">Ludmyla Romualdo de Jesus</div>
+      <div class="pnome">Ludmyla Romualdo de Jesus (Graduação - UFV)</div>
       <div class="pcargo" data-i18n="team_role_researcher_f">Pesquisadora</div>
       <a class="plnk" href="https://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=K1105088T4" target="_blank" rel="noopener noreferrer" data-i18n="team_lattes">Acessar Lattes</a>
     </div>
@@ -545,7 +656,7 @@ footer span{color:#6B5040;}
 </main>
 
 <footer>
-  <div style="margin-bottom:6px;"><span data-i18n="footer_title">EEPI · Empreendimentos Econômicos em Povos Indígenas</span></div>
+  <div style="margin-bottom:6px;"><span data-i18n="footer_title">EEPI · Empreendimentos Econômicos com Participação Indígena</span></div>
   <div style="margin-bottom:8px;"><span data-i18n="footer_data">Dados: Receita Federal / minhareceita.org</span></div>
   <div class="footer-team-row">
     <span class="footer-team-lbl" data-i18n="footer_team">Equipe:</span>
@@ -556,11 +667,11 @@ footer span{color:#6B5040;}
 </footer>
 
 <script>
-const ECO_UF  = {AM:99,PA:68,SP:51,MT:41,MS:40,MA:23,BA:23,RR:20,RS:19,PE:14,AC:13,TO:11,AL:9,CE:9,RO:7,ES:6,PR:6,AP:4,RJ:2,SC:2,MG:1};
-const NAO_UF  = {AM:398,MT:229,MS:228,MA:194,PA:176,RR:119,PE:97,SP:87,BA:83,RS:65,CE:51,AL:49,TO:45,PR:41,AC:39,RO:36,SC:26,ES:18,AP:17,MG:15,RJ:7,GO:5,RN:1};
+const ECO_UF  = {AM:87,PA:60,MT:34,MS:30,MA:22,BA:22,RR:20,PE:14,SP:11,AC:10,TO:9,AL:7,RS:7,RO:6,CE:5,ES:5,AP:4,PR:4,MG:1,RJ:1,SC:1};
+const NAO_UF  = {AM:410,MS:238,MT:236,MA:195,PA:184,SP:127,RR:119,PE:97,BA:84,RS:77,CE:55,AL:51,TO:47,PR:43,AC:42,RO:37,SC:27,ES:19,AP:17,MG:15,RJ:8,GO:5,RN:1};
 const ASS_UF  = {AM:383,MT:201,MS:194,MA:176,PA:156,RR:112,PE:91,SP:74,BA:61,RS:59,TO:43,PR:39,RO:35,AL:35,AC:30,SC:26,CE:21,ES:16,AP:16,MG:15,RJ:7,GO:4,RN:1};
 const MAPA_DADOS = {eco:ECO_UF, nao:NAO_UF, ass:ASS_UF};
-const MAPA_TOT   = {eco:468, nao:2026, ass:1795};
+const MAPA_TOT   = {eco:360, nao:2134, ass:1795};
 const MAPA_CORES = {
   eco:['#C7E9C0','#A1D99B','#74C476','#41AB5D','#238B45','#006D2C','#00441B'],
   nao:['#FCBBA1','#FC9272','#FB6A4A','#EF3B2C','#CB181D','#A50F15','#67000D'],
@@ -602,28 +713,36 @@ function barras(id, obj, cor, total) {
 
 function buildBars(lang) {
   if (lang === 'en') {
-    barras('bh-nat-eco', {'Private association':276,'Limited liability company (LTDA)':67,Cooperative:48,'Sole proprietor':13,'Indigenous community':6,'Closed corporation':2,'Private foundation':1,'Union entity':1}, '#2D5A27', 468);
-    barras('bh-cnae-eco', {'Rights-defense associations':177,'Culture and arts orgs':29,'Unspecified associations':28,'Agriculture support':18,'Clothing retail':9,'Souvenirs/handicrafts retail':8,'Cassava cultivation':7,'Professional associations':6,'Wholesale of agricultural materials':5,'Livestock support':5}, '#2D5A27', 468);
-    barras('bh-cnae-nao', {'Rights-defense associations':1277,'Unspecified associations':337,'School boards admin.':85,'Culture and arts orgs':77,'Religious organizations':54,'Elementary education':52,'General public administration':35,'Secondary education':17}, '#7B1F1F', 2026);
-    barras('bh-nat-nao', {'Private association':1665,'Indigenous community':45,'Religious organization':45,'Federal public foundation':22,'Condominium':6,'Social organization':5,'Limited liability company (LTDA)':4,'Private foundation':3}, '#7B1F1F', 2026);
+    barras('bh-nat-eco', {'Private association':253,Cooperative:48,'Limited liability company (LTDA)':17,'Indigenous community':6,'Private foundation':1,'Union entity':1,'Public consortium':1}, '#2D5A27', 360);
+    barras('bh-cnae-eco', {'Rights-defense associations':168,'Unspecified associations':27,'Culture and arts orgs':22,'Agriculture support':18,'Cassava cultivation':7,'Souvenirs/handicrafts retail':7,'Professional associations':6,'Wholesale of agricultural materials':5,'Livestock support':5,'Brazil nut gathering':3}, '#2D5A27', 360);
+    barras('bh-cnae-nao', {'Rights-defense associations':1286,'Unspecified associations':338,'School boards admin.':85,'Culture and arts orgs':84,'Religious organizations':54,'Elementary education':52,'General public administration':35,'Secondary education':17}, '#7B1F1F', 2134);
+    barras('bh-nat-nao', {'Private association':1688,'Limited liability company (LTDA)':54,'Indigenous community':45,'Religious organization':45,'Federal public foundation':22,'Sole proprietor':13,'Condominium':6,'Social organization':5}, '#7B1F1F', 2134);
     barras('bh-nat-ass', {'Private association':1553,'Religious organization':45,'Indigenous community':44,'Social organization':5,'Private foundation':3}, '#1A4A6B', 1795);
+    barras('bh-pri-assoc', {'Rights-defense associations':154,'Unspecified associations':24,'Culture and arts orgs':17,'Agriculture support':10,'Professional associations':5,'Cassava cultivation':3}, '#2D5A27', 253);
+    barras('bh-sec-assoc', {'Agriculture support':96,'Cassava cultivation':66,'Other temporary crops':63,'Corn cultivation':58,'Horticulture':57,'Cassava flour manuf.':54}, '#2D5A27', 253);
+    barras('bh-pri-coop', {'Agriculture support':7,'Wholesale of agric. materials':4,'Cassava cultivation':4,'Brazil nut gathering':3,'Employers associations':2,'Precious metals mining':2}, '#B5521E', 48);
+    barras('bh-sec-coop', {'Corn cultivation':22,'Banana cultivation':18,'Fish farming':17,'Souvenirs/handicrafts retail':16,'Cassava cultivation':15,'Açaí cultivation':14}, '#B5521E', 48);
     return;
   }
-  barras('bh-nat-eco', {Associação_Privada:276,'Soc. Empresária Ltda':67,Cooperativa:48,'Empresário Individual':13,'Comunidade Indígena':6,'Soc. Anônima Fechada':2,'Fundação Privada':1,'Entidade Sindical':1}, '#2D5A27', 468);
-  barras('bh-cnae-eco', {'Def. de direitos sociais':177,'Org. cultura e arte':29,'Assoc. não especificadas':28,'Apoio à agricultura':18,'Com. vestuário':9,'Com. suvenires/artesanato':8,'Cultivo de mandioca':7,'Assoc. profissionais':6,'Com. atacadista mat. agrícolas':5,'Apoio à pecuária':5}, '#2D5A27', 468);
-  barras('bh-cnae-nao', {'Def. de direitos sociais':1277,'Assoc. não especificadas':337,'Adm. caixas escolares':85,'Org. cultura e arte':77,'Organizações religiosas':54,'Ensino fundamental':52,'Adm. pública em geral':35,'Ensino médio':17}, '#7B1F1F', 2026);
-  barras('bh-nat-nao', {'Associação Privada':1665,'Comunidade Indígena':45,'Organização Religiosa':45,'Fundação Pública Federal':22,'Condomínio Edilício':6,'Organização Social':5,'Soc. Empresária Ltda':4,'Fundação Privada':3}, '#7B1F1F', 2026);
+  barras('bh-nat-eco', {'Associação Privada':253,Cooperativa:48,'Soc. Empresária Ltda':17,'Comunidade Indígena':6,'Fundação Privada':1,'Entidade Sindical':1,'Consórcio Público':1}, '#2D5A27', 360);
+  barras('bh-cnae-eco', {'Def. de direitos sociais':168,'Assoc. não especificadas':27,'Org. cultura e arte':22,'Apoio à agricultura':18,'Cultivo de mandioca':7,'Com. suvenires/artesanato':7,'Assoc. profissionais':6,'Com. atacadista mat. agrícolas':5,'Apoio à pecuária':5,'Coleta castanha-do-pará':3}, '#2D5A27', 360);
+  barras('bh-cnae-nao', {'Def. de direitos sociais':1286,'Assoc. não especificadas':338,'Adm. caixas escolares':85,'Org. cultura e arte':84,'Organizações religiosas':54,'Ensino fundamental':52,'Adm. pública em geral':35,'Ensino médio':17}, '#7B1F1F', 2134);
+  barras('bh-nat-nao', {'Associação Privada':1688,'Soc. Empresária Ltda':54,'Comunidade Indígena':45,'Organização Religiosa':45,'Fundação Pública Federal':22,'Empresário Individual':13,'Condomínio Edilício':6,'Organização Social':5}, '#7B1F1F', 2134);
   barras('bh-nat-ass', {'Associação Privada':1553,'Organização Religiosa':45,'Comunidade Indígena':44,'Organização Social':5,'Fundação Privada':3}, '#1A4A6B', 1795);
+  barras('bh-pri-assoc', {'Def. de direitos sociais':154,'Assoc. não especificadas':24,'Org. cultura e arte':17,'Apoio à agricultura':10,'Assoc. profissionais':5,'Cultivo de mandioca':3}, '#2D5A27', 253);
+  barras('bh-sec-assoc', {'Apoio à agricultura':96,'Cultivo de mandioca':66,'Outras lavouras temp.':63,'Cultivo de milho':58,'Horticultura':57,'Fab. farinha de mandioca':54}, '#2D5A27', 253);
+  barras('bh-pri-coop', {'Apoio à agricultura':7,'Com. atacadista mat. agrícolas':4,'Cultivo de mandioca':4,'Coleta castanha-do-pará':3,'Assoc. patronais/empresariais':2,'Extração metais preciosos':2}, '#B5521E', 48);
+  barras('bh-sec-coop', {'Cultivo de milho':22,'Cultivo de banana':18,'Criação de peixes':17,'Com. suvenires/artesanato':16,'Cultivo de mandioca':15,'Cultivo de açaí':14}, '#B5521E', 48);
 }
 
 // ── TABELAS ───────────────────────────────────────────────────────────────
 const tbEco = document.getElementById('tb-eco');
 Object.entries(ECO_UF).sort((a,b)=>b[1]-a[1]).forEach(([uf,n]) => {
-  tbEco.innerHTML += `<tr><td><strong>${uf}</strong> — ${UF_NOME[uf]||''}</td><td>${n}</td><td>${(n/468*100).toFixed(1)}%</td></tr>`;
+  tbEco.innerHTML += `<tr><td><strong>${uf}</strong> — ${UF_NOME[uf]||''}</td><td>${n}</td><td>${(n/360*100).toFixed(1)}%</td></tr>`;
 });
 const tbNao = document.getElementById('tb-nao');
 Object.entries(NAO_UF).sort((a,b)=>b[1]-a[1]).slice(0,10).forEach(([uf,n]) => {
-  tbNao.innerHTML += `<tr><td><strong>${uf}</strong> — ${UF_NOME[uf]||''}</td><td>${n}</td><td>${(n/2026*100).toFixed(1)}%</td></tr>`;
+  tbNao.innerHTML += `<tr><td><strong>${uf}</strong> — ${UF_NOME[uf]||''}</td><td>${n}</td><td>${(n/2134*100).toFixed(1)}%</td></tr>`;
 });
 
 // ── CHARTS.JS ─────────────────────────────────────────────────────────────
@@ -642,8 +761,8 @@ function buildCharts(lang) {
   CH.prop = new Chart(document.getElementById('ch-prop'), {
     type:'bar',
     data:{labels:[''],datasets:[
-      {label:L.comp_eco, data:[468], backgroundColor:'#2D5A27'},
-      {label:L.comp_nao, data:[2026], backgroundColor:'#7B1F1F'}
+      {label:L.comp_eco, data:[360], backgroundColor:'#2D5A27'},
+      {label:L.comp_nao, data:[2134], backgroundColor:'#7B1F1F'}
     ]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
       scales:{x:{stacked:true,display:false},y:{stacked:true,display:false}},
@@ -652,8 +771,8 @@ function buildCharts(lang) {
 
   CH.niveis = new Chart(document.getElementById('ch-niveis'), {
     type:'bar',
-    data:{labels:lang==='en' ? ['Very High','High','Medium (conf.)','Medium (prob.)'] : ['Muito Alto','Alto','Médio Conf.','Médio Prov.'],
-      datasets:[{data:[41,2289,130,245],backgroundColor:['#8B3A1A','#B5521E','#C47A3A','#D4A060'],borderRadius:4}]},
+    data:{labels:lang==='en' ? ['Very High','High','Medium'] : ['Muito Alto','Alto','Médio'],
+      datasets:[{data:[41,2289,375],backgroundColor:['#8B3A1A','#B5521E','#C47A3A'],borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{y:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},x:{grid:{display:false},ticks:{font:CFONT}}}}
@@ -661,15 +780,15 @@ function buildCharts(lang) {
 
   CH.regEco = new Chart(document.getElementById('ch-reg-eco'), {
     type:'doughnut',
-    data:{labels:lang==='en' ? ['North','Center-West','Northeast','Southeast','South'] : ['Norte','Centro-Oeste','Nordeste','Sudeste','Sul'],
-      datasets:[{data:[222,81,78,60,27],backgroundColor:['#1A4A3A','#2D5A27','#4A7A40','#6A9A60','#8ABA80'],borderWidth:2,borderColor:'#fff'}]},
+    data:{labels:lang==='en' ? ['North','Northeast','Center-West','Southeast','South'] : ['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'],
+      datasets:[{data:[196,70,64,18,12],backgroundColor:['#1A4A3A','#2D5A27','#4A7A40','#6A9A60','#8ABA80'],borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:CFONT}}}}
   });
 
   const secTop = lang==='en'
-    ? [['Agriculture support',117],['Cassava cultivation',87],['Corn cultivation',85],['Other temporary crops',77],['Horticulture',74],['Cassava flour manufacturing',72],['Fish farming',71],['Banana cultivation',71],['Souvenirs/handicrafts retail',68],['Açaí cultivation',63]]
-    : [['Apoio à agricultura',117],['Cultivo de mandioca',87],['Cultivo de milho',85],['Outras lavouras temp.',77],['Horticultura',74],['Fab. farinha de mandioca',72],['Criação de peixes',71],['Cultivo de banana',71],['Com. suvenires/artesanato',68],['Cultivo de açaí',63]];
+    ? [['Agriculture support',114],['Cassava cultivation',86],['Corn cultivation',84],['Other temporary crops',76],['Horticulture',74],['Cassava flour manufacturing',72],['Banana cultivation',71],['Fish farming',69],['Souvenirs/handicrafts retail',64],['Açaí cultivation',63]]
+    : [['Apoio à agricultura',114],['Cultivo de mandioca',86],['Cultivo de milho',84],['Outras lavouras temp.',76],['Horticultura',74],['Fab. farinha de mandioca',72],['Cultivo de banana',71],['Criação de peixes',69],['Com. suvenires/artesanato',64],['Cultivo de açaí',63]];
   CH.sec = new Chart(document.getElementById('ch-sec'), {
     type:'bar',
     data:{labels:secTop.map(d=>d[0]),datasets:[{data:secTop.map(d=>d[1]),backgroundColor:'#4A8A50',borderRadius:3}]},
@@ -704,6 +823,45 @@ function buildCharts(lang) {
       plugins:{legend:{display:false}},
       scales:{y:{beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}},x:{grid:{display:false},ticks:{font:CFONT}}}}
   });
+
+  const REGLB = lang==='en' ? ['North','Northeast','Center-West','Southeast','South'] : ['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'];
+  const GREEN5 = ['#1A4A3A','#2D5A27','#4A7A40','#6A9A60','#8ABA80'];
+  const OCRE5 = ['#8B3A1A','#B5521E','#C47A3A','#D4A060','#E0BC8A'];
+
+  CH.regAssocEco = new Chart(document.getElementById('ch-reg-assoc'), {
+    type:'doughnut',
+    data:{labels:REGLB, datasets:[{data:[143,49,45,9,7],backgroundColor:GREEN5,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:CFONT}}}}
+  });
+  CH.regCoopEco = new Chart(document.getElementById('ch-reg-coop'), {
+    type:'doughnut',
+    data:{labels:REGLB, datasets:[{data:[26,7,7,4,4],backgroundColor:OCRE5,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:CFONT}}}}
+  });
+
+  const STACK6 = ['#2D5A27','#4A7A40','#6A9A60','#B5521E','#C47A3A','#D4A060'];
+  const priCats = lang==='en'
+    ? ['Rights-defense assoc.','Unspecified assoc.','Culture & arts','Agriculture support','Cassava cultivation','Souvenirs retail']
+    : ['Def. direitos sociais','Assoc. não especif.','Cultura e arte','Apoio à agricultura','Cultivo de mandioca','Com. suvenires'];
+  const priData = [[98,31,32,4,3],[20,1,3,1,2],[17,3,1,0,1],[7,2,4,3,2],[4,3,0,0,0],[1,3,1,2,0]];
+  CH.cnaeRegPri = new Chart(document.getElementById('ch-cnaereg-pri'), {
+    type:'bar',
+    data:{labels:REGLB, datasets:priCats.map((c,i)=>({label:c,data:priData[i],backgroundColor:STACK6[i]}))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:11,font:CFONT}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{font:CFONT}},y:{stacked:true,beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}}}}
+  });
+  const secCats = lang==='en'
+    ? ['Agriculture support','Cassava cultivation','Corn cultivation','Other temporary crops','Horticulture','Cassava flour']
+    : ['Apoio à agricultura','Cultivo de mandioca','Cultivo de milho','Outras lavouras temp.','Horticultura','Farinha de mandioca'];
+  const secData = [[81,20,13,0,0],[69,6,10,1,0],[65,4,13,0,2],[61,7,7,1,0],[63,6,4,1,0],[64,2,5,1,0]];
+  CH.cnaeRegSec = new Chart(document.getElementById('ch-cnaereg-sec'), {
+    type:'bar',
+    data:{labels:REGLB, datasets:secCats.map((c,i)=>({label:c,data:secData[i],backgroundColor:STACK6[i]}))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:11,font:CFONT}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{font:CFONT}},y:{stacked:true,beginAtZero:true,grid:{color:'#F2EDE5'},ticks:{font:CFONT}}}}
+  });
 }
 
 // ── MAPA ──────────────────────────────────────────────────────────────────
@@ -721,6 +879,7 @@ function getRegistroLabel(v) {
   return v === 1 ? 'registro' : 'registros';
 }
 
+function mapMobile(){ return (window.matchMedia && window.matchMedia("(max-width:620px)").matches) || window.innerWidth<=620; }
 function getCor(v, maxV, cores) {
   if (!v || v === 0) return '#EDE8E0';
   const idx = Math.min(6, Math.floor(v / maxV * 6.99));
@@ -744,20 +903,21 @@ function renderMapa(tipo) {
   ST.forEach(st => {
     const v = dados[st.s] || 0;
     const cor = getCor(v, maxV, cores);
-    const r = v > 0 ? Math.max(16, Math.min(52, 16 + (v / maxV) * 36)) : 14;
+    const _m = mapMobile(); const _rMin = _m?24:16, _rMax = _m?74:52, _rZero = _m?16:14;
+    const r = v > 0 ? Math.max(_rMin, Math.min(_rMax, _rMin + (v / maxV) * (_rMax-_rMin))) : _rZero;
 
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
     g.style.cursor = 'pointer';
 
     const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
     c.setAttribute('cx', st.x); c.setAttribute('cy', st.y); c.setAttribute('r', r);
-    c.setAttribute('fill', cor); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1.5');
+    c.setAttribute('fill', cor); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1.5'); c.setAttribute('fill-opacity', _m ? '0.9' : '1');
     c.style.transition = 'r .2s, opacity .2s';
 
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x', st.x); t.setAttribute('y', st.y);
     t.setAttribute('dominant-baseline','middle'); t.setAttribute('text-anchor','middle');
-    t.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#1a1a1a;pointer-events:none;font-weight:500;";
+    t.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:"+(_m?12:9)+"px;fill:#1a1a1a;pointer-events:none;font-weight:"+(_m?700:500)+";";
     t.textContent = st.s;
 
     g.addEventListener('mouseenter', function(e) {
@@ -780,7 +940,7 @@ function renderMapa(tipo) {
       window.open(url, '_blank', 'noopener');
     });
 
-    g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+    g.appendChild(c); if(!_m || v > 0) g.appendChild(t); svg.appendChild(g);
   });
 }
 
@@ -792,6 +952,289 @@ function trocarMapa(tipo, btn) {
 }
 
 renderMapa('eco');
+
+// ── MAPA POR CNAE ─────────────────────────────────────────────────────────
+const CNAE_OPTS = [
+  {k:"9430800",d:"Atividades de associações de defesa de direitos sociais",t:168},
+  {k:"9499500",d:"Atividades associativas não especificadas anteriormente",t:27},
+  {k:"9493600",d:"Atividades de organizações associativas ligadas à cultura e à arte",t:22},
+  {k:"161099",d:"Atividades de apoio à agricultura não especificadas anteriormente",t:18},
+  {k:"119906",d:"Cultivo de mandioca",t:7},
+  {k:"4789001",d:"Comércio varejista de suvenires, bijuterias e artesanatos",t:7},
+  {k:"9412099",d:"Outras atividades associativas profissionais",t:6},
+  {k:"162899",d:"Atividades de apoio à pecuária não especificadas anteriormente",t:5},
+  {k:"4623108",d:"Comércio atacadista de matérias-primas agrícolas com atividade de fracionamento e acondicionamento associada",t:5},
+  {k:"220903",d:"Coleta de castanha-do-pará em florestas nativas",t:3},
+  {k:"230600",d:"Atividades de apoio à produção florestal",t:3},
+  {k:"4724500",d:"Comércio varejista de hortifrutigranjeiros",t:3},
+  {k:"4729699",d:"Comércio varejista de produtos alimentícios em geral ou especializado em produtos alimentícios não especificados anteriormente",t:3},
+  {k:"7911200",d:"Agências de viagens",t:3},
+  {k:"8412400",d:"Regulação das atividades de saúde, educação, serviços culturais e outros serviços sociais",t:3},
+  {k:"9411100",d:"Atividades de organizações associativas patronais e empresariais",t:3},
+  {k:"111301",d:"Cultivo de arroz",t:2},
+  {k:"111302",d:"Cultivo de milho",t:2},
+  {k:"111399",d:"Cultivo de outros cereais não especificados anteriormente",t:2},
+  {k:"115600",d:"Cultivo de soja",t:2},
+  {k:"151202",d:"Criação de bovinos para leite",t:2},
+  {k:"159801",d:"Apicultura",t:2},
+  {k:"1629301",d:"Fabricação de artefatos diversos de madeira, exceto móveis",t:2},
+  {k:"220906",d:"Conservação de florestas nativas",t:2},
+  {k:"4120400",d:"Construção de edifícios",t:2},
+  {k:"4633801",d:"Comércio atacadista de frutas, verduras, raízes, tubérculos, hortaliças e legumes frescos",t:2},
+  {k:"4712100",d:"Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - minimercados, mercearias e armazéns",t:2},
+  {k:"4723700",d:"Comércio varejista de bebidas",t:2},
+  {k:"4744002",d:"Comércio varejista de madeira e artefatos",t:2},
+  {k:"4929999",d:"Outros transportes rodoviários de passageiros não especificados anteriormente",t:2},
+  {k:"724301",d:"Extração de minério de metais preciosos",t:2},
+  {k:"9102301",d:"Atividades de museus e de exploração de lugares e prédios históricos e atrações similares",t:2},
+  {k:"9319199",d:"Outras atividades esportivas não especificadas anteriormente",t:2},
+  {k:"1012101",d:"Abate de aves",t:1},
+  {k:"1033301",d:"Fabricação de sucos concentrados de frutas, hortaliças e legumes",t:1},
+  {k:"1063500",d:"Fabricação de farinha de mandioca e derivados",t:1},
+  {k:"1099699",d:"Fabricação de outros produtos alimentícios não especificados anteriormente",t:1},
+  {k:"119901",d:"Cultivo de abacaxi",t:1},
+  {k:"119999",d:"Cultivo de outras plantas de lavoura temporária não especificadas anteriormente",t:1},
+  {k:"133401",d:"Cultivo de açaí",t:1},
+  {k:"135100",d:"Cultivo de cacau",t:1},
+  {k:"1351100",d:"Fabricação de artefatos têxteis para uso doméstico",t:1},
+  {k:"161003",d:"Serviço de preparação de terreno, cultivo e colheita",t:1},
+  {k:"1610203",d:"Serrarias com desdobramento de madeira em bruto",t:1},
+  {k:"220901",d:"Extração de madeira em florestas nativas",t:1},
+  {k:"220999",d:"Coleta de produtos não-madeireiros não especificados anteriormente em florestas nativas",t:1},
+  {k:"3211602",d:"Fabricação de artefatos de joalheria e ourivesaria",t:1},
+  {k:"3212400",d:"Fabricação de bijuterias e artefatos semelhantes",t:1},
+  {k:"322101",d:"Criação de peixes em água doce",t:1},
+  {k:"3313901",d:"Manutenção e reparação de geradores, transformadores e motores elétricos",t:1},
+  {k:"4299599",d:"Outras obras de engenharia civil não especificadas anteriormente",t:1},
+  {k:"4623199",d:"Comércio atacadista de matérias-primas agrícolas não especificadas anteriormente",t:1},
+  {k:"4632001",d:"Comércio atacadista de cereais e leguminosas beneficiados",t:1},
+  {k:"4639702",d:"Comércio atacadista de produtos alimentícios em geral, com atividade de fracionamento e acondicionamento associada",t:1},
+  {k:"4713002",d:"Lojas de variedades, exceto lojas de departamentos ou magazines",t:1},
+  {k:"4789099",d:"Comércio varejista de outros produtos não especificados anteriormente",t:1},
+  {k:"4929901",d:"Transporte rodoviário coletivo de passageiros, sob regime de fretamento, municipal",t:1},
+  {k:"5229001",d:"Serviços de apoio ao transporte por táxi, inclusive centrais de chamada",t:1},
+  {k:"5611201",d:"Restaurantes e similares",t:1},
+  {k:"6010100",d:"Atividades de rádio",t:1},
+  {k:"6424703",d:"Cooperativas de crédito mútuo",t:1},
+  {k:"6810202",d:"Aluguel de imóveis próprios",t:1},
+  {k:"729401",d:"Extração de minérios de nióbio e titânio",t:1},
+  {k:"7490103",d:"Serviços de agronomia e de consultoria às atividades agrícolas e pecuárias",t:1},
+  {k:"7490199",d:"Outras atividades profissionais, científicas e técnicas não especificadas anteriormente",t:1},
+  {k:"7990200",d:"Serviços de reservas e outros serviços de turismo não especificados anteriormente",t:1},
+  {k:"8211300",d:"Serviços combinados de escritório e apoio administrativo",t:1},
+  {k:"8425600",d:"Defesa Civil",t:1},
+  {k:"8592999",d:"Ensino de arte e cultura não especificado anteriormente",t:1},
+  {k:"8730199",d:"Atividades de assistência social prestadas em residências coletivas e particulares não especificadas anteriormente",t:1},
+  {k:"9001999",d:"Artes cênicas, espetáculos e atividades complementares não especificadas anteriormente",t:1},
+  {k:"9103100",d:"Atividades de jardins botânicos, zoológicos, parques nacionais, reservas ecológicas e áreas de proteção ambiental",t:1},
+  {k:"9329899",d:"Outras atividades de recreação e lazer não especificadas anteriormente",t:1}
+];
+const CNAE_UF = {
+  "9430800":{MS:17,TO:5,AM:36,RO:2,PE:6,RR:7,MA:9,PA:42,MT:15,BA:10,SP:2,AL:6,RS:2,AC:4,ES:2,PR:1,AP:2},
+  "9499500":{PA:8,AM:10,MT:2,RS:1,ES:1,PR:1,MS:1,RR:2,BA:1},
+  "9493600":{MS:1,PA:3,CE:1,AM:11,BA:1,PR:1,RR:2,AC:1,PE:1},
+  "161099":{MS:4,AM:4,MA:1,SP:3,CE:1,RR:1,PR:1,RS:1,AC:2},
+  "119906":{RR:3,AM:1,MA:3},
+  "4789001":{BA:3,AM:1,RJ:1,SP:1,MT:1},
+  "9412099":{AM:5,MT:1},
+  "162899":{RS:1,AM:2,MT:1,MA:1},
+  "4623108":{SP:1,MT:3,RO:1},
+  "220903":{MT:2,RO:1},
+  "230600":{PA:2,AM:1},
+  "4724500":{AM:1,PE:1,RR:1},
+  "4729699":{AM:1,MT:1,SP:1},
+  "7911200":{TO:3},
+  "8412400":{MA:3},
+  "9411100":{CE:1,AC:1,PE:1},
+  "111301":{RR:1,TO:1},
+  "111302":{MS:1,MA:1},
+  "111399":{PA:1,MA:1},
+  "115600":{MT:2},
+  "151202":{MS:2},
+  "159801":{ES:1,MS:1},
+  "1629301":{MG:1,MT:1},
+  "220906":{BA:1,PA:1},
+  "4120400":{RS:1,BA:1},
+  "4633801":{AP:1,AM:1},
+  "4712100":{MA:1,AM:1},
+  "4723700":{RO:1,MT:1},
+  "4744002":{ES:1,BA:1},
+  "4929999":{AM:2},
+  "724301":{AM:1,PA:1},
+  "9102301":{CE:1,PA:1},
+  "9319199":{AL:1,MS:1},
+  "1012101":{PE:1},
+  "1033301":{AM:1},
+  "1063500":{AM:1},
+  "1099699":{AM:1},
+  "119901":{MA:1},
+  "119999":{MA:1},
+  "133401":{AM:1},
+  "135100":{AM:1},
+  "1351100":{MT:1},
+  "161003":{AM:1},
+  "1610203":{PA:1},
+  "220901":{AM:1},
+  "220999":{MT:1},
+  "3211602":{RR:1},
+  "3212400":{AC:1},
+  "322101":{BA:1},
+  "3313901":{AM:1},
+  "4299599":{PE:1},
+  "4623199":{SP:1},
+  "4632001":{RS:1},
+  "4639702":{AC:1},
+  "4713002":{SP:1},
+  "4789099":{PE:1},
+  "4929901":{AP:1},
+  "5229001":{RR:1},
+  "5611201":{BA:1},
+  "6010100":{PE:1},
+  "6424703":{BA:1},
+  "6810202":{RR:1},
+  "729401":{AM:1},
+  "7490103":{RO:1},
+  "7490199":{SP:1},
+  "7990200":{MT:1},
+  "8211300":{MT:1},
+  "8425600":{MS:1},
+  "8592999":{MS:1},
+  "8730199":{PE:1},
+  "9001999":{CE:1},
+  "9103100":{BA:1},
+  "9329899":{SC:1}
+};
+const CNAE_TOT = {"9430800":168,"9499500":27,"9493600":22,"161099":18,"119906":7,"4789001":7,"9412099":6,"162899":5,"4623108":5,"220903":3,"230600":3,"4724500":3,"4729699":3,"7911200":3,"8412400":3,"9411100":3,"111301":2,"111302":2,"111399":2,"115600":2,"151202":2,"159801":2,"1629301":2,"220906":2,"4120400":2,"4633801":2,"4712100":2,"4723700":2,"4744002":2,"4929999":2,"724301":2,"9102301":2,"9319199":2,"1012101":1,"1033301":1,"1063500":1,"1099699":1,"119901":1,"119999":1,"133401":1,"135100":1,"1351100":1,"161003":1,"1610203":1,"220901":1,"220999":1,"3211602":1,"3212400":1,"322101":1,"3313901":1,"4299599":1,"4623199":1,"4632001":1,"4639702":1,"4713002":1,"4789099":1,"4929901":1,"5229001":1,"5611201":1,"6010100":1,"6424703":1,"6810202":1,"729401":1,"7490103":1,"7490199":1,"7990200":1,"8211300":1,"8425600":1,"8592999":1,"8730199":1,"9001999":1,"9103100":1,"9329899":1};
+const CNAE_CORES = ['#D9E6D4','#B7D1AE','#8FBA84','#6BA05C','#4A8540','#326B2A','#1E4D18'];
+const GRUPO_OPTS = [
+  {k:"ASSOC",pt:"Organizações associativas e outros serviços",en:"Membership orgs & other services",t:226},
+  {k:"AGRO",pt:"Agricultura, pecuária e pesca",en:"Agriculture, livestock & fishing",t:58},
+  {k:"COM",pt:"Comércio e reparação",en:"Commerce & repair",t:31},
+  {k:"IND",pt:"Indústria de transformação",en:"Manufacturing",t:11},
+  {k:"CULT",pt:"Artes, cultura, esporte e recreação",en:"Arts, culture, sports & recreation",t:7},
+  {k:"ADM",pt:"Atividades administrativas",en:"Administrative & support",t:5},
+  {k:"PUB",pt:"Administração pública e defesa",en:"Public administration & defense",t:4},
+  {k:"TRANS",pt:"Transporte e armazenagem",en:"Transport & storage",t:4},
+  {k:"CONS",pt:"Construção",en:"Construction",t:3},
+  {k:"EXT",pt:"Indústrias extrativas",en:"Mining & extraction",t:3},
+  {k:"PROF",pt:"Atividades profissionais e técnicas",en:"Professional & technical",t:2},
+  {k:"ALIM",pt:"Alojamento e alimentação",en:"Accommodation & food",t:1},
+  {k:"INFO",pt:"Informação e comunicação",en:"Information & communication",t:1},
+  {k:"FIN",pt:"Atividades financeiras e seguros",en:"Finance & insurance",t:1},
+  {k:"IMOB",pt:"Atividades imobiliárias",en:"Real estate",t:1},
+  {k:"EDU",pt:"Educação",en:"Education",t:1},
+  {k:"SAUDE",pt:"Saúde e serviços sociais",en:"Health & social services",t:1}
+];
+const GRUPO_UF = {
+  "ASSOC":{MS:19,TO:5,AM:62,RO:2,PE:8,RR:11,MA:9,PA:53,MT:18,BA:12,SP:2,AL:6,RS:3,AC:6,ES:3,PR:3,AP:2,CE:2},
+  "AGRO":{MS:8,AM:12,MA:9,SP:3,CE:1,RR:5,PR:1,RS:2,AC:2,MT:6,RO:1,PA:4,TO:1,ES:1,BA:2},
+  "COM":{BA:4,AM:5,RJ:1,SP:5,MT:6,RO:2,PE:2,RR:1,AP:1,MA:1,ES:1,RS:1,AC:1},
+  "IND":{MG:1,MT:2,PE:1,AM:4,PA:1,RR:1,AC:1},
+  "CULT":{CE:2,PA:1,AL:1,MS:1,BA:1,SC:1},
+  "ADM":{TO:3,MT:2},
+  "PUB":{MA:3,MS:1},
+  "TRANS":{AM:2,AP:1,RR:1},
+  "CONS":{RS:1,BA:1,PE:1},
+  "EXT":{AM:2,PA:1},
+  "PROF":{RO:1,SP:1},
+  "ALIM":{BA:1},
+  "INFO":{PE:1},
+  "FIN":{BA:1},
+  "IMOB":{RR:1},
+  "EDU":{MS:1},
+  "SAUDE":{PE:1}
+};
+const GRUPO_TOT = {"ASSOC":226,"AGRO":58,"COM":31,"IND":11,"CULT":7,"ADM":5,"PUB":4,"TRANS":4,"CONS":3,"EXT":3,"PROF":2,"ALIM":1,"INFO":1,"FIN":1,"IMOB":1,"EDU":1,"SAUDE":1};
+let cnaeAtual = CNAE_OPTS[0].k;
+let grupoAtual = GRUPO_OPTS[0].k;
+let cnaeDim = 'cnae';
+
+function cnaeActive(){
+  if(cnaeDim==='grupo'){
+    const o = GRUPO_OPTS.find(x=>x.k===grupoAtual);
+    const lab = o ? (LANG==='en'? o.en : o.pt) : '';
+    return {dados: GRUPO_UF[grupoAtual]||{}, total: GRUPO_TOT[grupoAtual]||1, label: lab + ' · ' + (GRUPO_TOT[grupoAtual]||0)};
+  }
+  const o = CNAE_OPTS.find(x=>x.k===cnaeAtual);
+  return {dados: CNAE_UF[cnaeAtual]||{}, total: CNAE_TOT[cnaeAtual]||1, label: (o?o.d:'') + ' · ' + (CNAE_TOT[cnaeAtual]||0)};
+}
+
+function buildCnaePills(){
+  const sel = document.getElementById('sel-cnae');
+  if(!sel) return;
+  sel.innerHTML = CNAE_OPTS.map(o =>
+    `<option value="${o.k}"${o.k===cnaeAtual?' selected':''}>${o.d} (${o.t})</option>`
+  ).join('');
+  sel.onchange = ()=> (window.trocarMapaCnae||trocarMapaCnae)(sel.value);
+}
+
+function buildGrupoSelect(){
+  const sel = document.getElementById('sel-grupo');
+  if(!sel) return;
+  sel.innerHTML = GRUPO_OPTS.map(o =>
+    `<option value="${o.k}"${o.k===grupoAtual?' selected':''}>${LANG==='en'?o.en:o.pt} (${o.t})</option>`
+  ).join('');
+  sel.onchange = ()=> (window.trocarMapaGrupo||trocarMapaGrupo)(sel.value);
+}
+
+function renderMapaCnae(){
+  const A = cnaeActive();
+  const dados = A.dados;
+  const maxV = Math.max(1, ...Object.values(dados));
+  const total = A.total;
+  const svg = document.getElementById('mapa-cnae-svg');
+  const mtt = document.getElementById('mtt-cnae');
+  const wrap = document.getElementById('mapa-cnae-wrap');
+  if(!svg) return;
+  const txt = document.getElementById('mleg-cnae-txt'); if(txt) txt.textContent = A.label;
+  const lc = document.getElementById('mleg-cnae-cores'); if(lc) lc.innerHTML = CNAE_CORES.map(c=>`<span class="lrect" style="background:${c}"></span>`).join('');
+  svg.innerHTML='';
+  ST.forEach(st=>{
+    const v = dados[st.s]||0;
+    const cor = getCor(v, maxV, CNAE_CORES);
+    const _m = mapMobile(); const _rMin=_m?22:14, _rMax=_m?68:50, _rZero=_m?15:12;
+    const r = v>0 ? Math.max(_rMin, Math.min(_rMax, _rMin + (v/maxV)*(_rMax-_rMin))) : _rZero;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g'); g.style.cursor='default';
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',st.x); c.setAttribute('cy',st.y); c.setAttribute('r',r);
+    c.setAttribute('fill',cor); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1.5'); c.setAttribute('fill-opacity', _m ? '0.9' : '1');
+    c.style.transition='r .2s, opacity .2s';
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',st.x); t.setAttribute('y',st.y);
+    t.setAttribute('dominant-baseline','middle'); t.setAttribute('text-anchor','middle');
+    t.style.cssText="font-family:'IBM Plex Mono',monospace;font-size:"+(_m?12:9)+"px;fill:#1a1a1a;pointer-events:none;font-weight:"+(_m?700:500)+";";
+    t.textContent=st.s;
+    g.addEventListener('mouseenter',()=>{c.setAttribute('r',r+4);c.style.opacity='.85';});
+    g.addEventListener('mouseleave',()=>{c.setAttribute('r',r);c.style.opacity='1';mtt.style.opacity='0';});
+    g.addEventListener('mousemove',e=>{
+      const rect=wrap.getBoundingClientRect();
+      const pct=v>0?(v/total*100).toFixed(1):'0.0';
+      mtt.innerHTML=`<strong>${UF_NOME[st.s]||st.s}</strong><br>${v} ${getRegistroLabel(v)} · ${pct}%`;
+      mtt.style.opacity='1';
+      mtt.style.left=(e.clientX-rect.left+14)+'px';
+      mtt.style.top=(e.clientY-rect.top-42)+'px';
+    });
+    g.appendChild(c); if(!_m || v > 0) g.appendChild(t); svg.appendChild(g);
+  });
+}
+
+function trocarMapaCnae(key){
+  cnaeDim='cnae'; cnaeAtual = key;
+  const sel=document.getElementById('sel-cnae'); if(sel && sel.value!==key) sel.value=key;
+  renderMapaCnae();
+}
+function trocarMapaGrupo(key){
+  cnaeDim='grupo'; grupoAtual = key;
+  const sel=document.getElementById('sel-grupo'); if(sel && sel.value!==key) sel.value=key;
+  renderMapaCnae();
+}
+
+buildCnaePills();
+buildGrupoSelect();
+renderMapaCnae();
+window.renderMainMap = window.renderMainMap || function(){ renderMapa(mapaAtual); };
+window.renderCnaeMap = window.renderCnaeMap || function(){ renderMapaCnae(); };
+window.addEventListener("resize", function(){ clearTimeout(window.__rzT); window.__rzT=setTimeout(function(){ try{(window.renderMainMap||function(){})();}catch(e){} try{(window.renderCnaeMap||function(){})();}catch(e){} }, 200); });
 
 // ── MAPA POLÍGONOS via CDN (se disponível) ────────────────────────────────
 fetch('https://cdn.jsdelivr.net/npm/brazil-atlas@1.1.0/brazil/states.json')
@@ -858,6 +1301,49 @@ fetch('https://cdn.jsdelivr.net/npm/brazil-atlas@1.1.0/brazil/states.json')
       btn.classList.add('on');
       renderPoly(tipo);
     };
+    window.renderMainMap = function(){ renderPoly(mapaAtual); };
+
+    // ── Mapa de polígonos por CNAE ──
+    const svgC = document.getElementById('mapa-cnae-svg');
+    const wrapC = document.getElementById('mapa-cnae-wrap');
+    const mttC = document.getElementById('mtt-cnae');
+    if (svgC) {
+      svgC.innerHTML=''; svgC.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const renderPolyCnae = function(){
+        const A = cnaeActive(); const dados = A.dados;
+        const maxV = Math.max(1, ...Object.values(dados));
+        const txt=document.getElementById('mleg-cnae-txt'); if(txt) txt.textContent=A.label;
+        const lc=document.getElementById('mleg-cnae-cores'); if(lc) lc.innerHTML=CNAE_CORES.map(c=>`<span class="lrect" style="background:${c}"></span>`).join('');
+        svgC.querySelectorAll('path').forEach(p=>{const uf=p.getAttribute('data-uf');const v=uf?(dados[uf]||0):0;p.setAttribute('fill',getCor(v,maxV,CNAE_CORES));});
+      };
+      features.forEach(f => {
+        const uf=f.properties.sigla;
+        const el=document.createElementNS('http://www.w3.org/2000/svg','path');
+        el.setAttribute('d', path(f)); el.setAttribute('data-uf', uf);
+        el.setAttribute('stroke','#fff'); el.setAttribute('stroke-width','0.5');
+        el.style.transition='fill .25s';
+        el.addEventListener('mousemove', function(e){
+          const A=cnaeActive(); const v=A.dados[uf]||0; const tot=A.total;
+          const rect=wrapC.getBoundingClientRect();
+          mttC.innerHTML=`<strong>${UF_NOME[uf]||uf}</strong><br>${v} ${getRegistroLabel(v)} · ${v>0?(v/tot*100).toFixed(1):0}%`;
+          mttC.style.opacity='1'; mttC.style.left=(e.clientX-rect.left+14)+'px'; mttC.style.top=(e.clientY-rect.top-42)+'px';
+        });
+        el.addEventListener('mouseleave', ()=>{ mttC.style.opacity='0'; });
+        svgC.appendChild(el);
+      });
+      window.trocarMapaCnae = function(key){
+        cnaeDim='cnae'; cnaeAtual=key;
+        const sel=document.getElementById('sel-cnae'); if(sel && sel.value!==key) sel.value=key;
+        renderPolyCnae();
+      };
+      window.trocarMapaGrupo = function(key){
+        cnaeDim='grupo'; grupoAtual=key;
+        const sel=document.getElementById('sel-grupo'); if(sel && sel.value!==key) sel.value=key;
+        renderPolyCnae();
+      };
+      window.renderCnaeMap = function(){ renderPolyCnae(); };
+      renderPolyCnae();
+    }
 
     renderPoly('eco');
   })
@@ -890,8 +1376,8 @@ window.addEventListener('scroll', () => {
 // ── I18N (PT/EN) ───────────────────────────────────────────────────────────
 const I18N = {
   pt: {
-    hero_title: "Empreendimentos<br><em>Econômicos</em> em<br>Povos Indígenas",
-    hero_sub: "Banco de dados construído a partir de registros no CNPJ/Receita Federal, com classificação por atividade econômica e nível de relevância. Universo: terras indígenas brasileiras.",
+    hero_title: "Empreendimentos<br><em>Econômicos</em> com<br>Participação Indígena",
+    hero_sub: "Banco de dados construído a partir de registros no CNPJ/Receita Federal, com classificação por atividade econômica e nível de relevância. Amostra: 238 terras indígenas localizadas em 236 municípios, provenientes da base de dados Tinteco.",
     kpi_cnpjs: "CNPJs analisados",
     kpi_econ: "Empreendimentos econômicos",
     kpi_assoc: "Associações (var. independente)",
@@ -913,20 +1399,20 @@ const I18N = {
     overview_title: "Visão geral do banco",
     overview_sub: "2.705 CNPJs distribuídos em categorias conforme critério metodológico da pesquisa.",
     card_total_lbl: "Total analisado",
-    card_total_det: "Alto · Muito Alto · Médio Conf. · Médio Prov.",
+    card_total_det: "Alto · Muito Alto · Médio",
     card_eco_lbl: "Econômico",
-    card_eco_det: "17,3% do banco · 397 ativas",
+    card_eco_det: "13,3% do banco · 316 ativas",
     card_nao_lbl: "Não econômico",
-    card_nao_det: "74,9% do banco · 1.650 ativas",
+    card_nao_det: "78,9% do banco · 1.731 ativas",
     card_ass_lbl: "Associações (var. independente)",
     card_ass_det: "Subconjunto do Não Econômico",
     comp_title: "Composição do banco",
-    comp_eco: "Econômico (468)",
-    comp_nao: "Não Econômico (2.026)",
+    comp_eco: "Econômico (360)",
+    comp_nao: "Não Econômico (2.134)",
     ov_lvl_title: "Por nível de relevância",
     ov_reg_title: "Econômicos por região",
     eco_title: "Empreendimentos econômicos",
-    eco_sub: "468 CNPJs com CNAE principal de atividade produtiva e/ou CNAE secundário econômico confirmado. Variável dependente da pesquisa.",
+    eco_sub: "360 CNPJs com CNAE principal de atividade produtiva e/ou CNAE secundário econômico confirmado (após exclusão de 108 falsos-positivos). Variável dependente da pesquisa.",
     eco_kpi_active_lbl: "Ativas",
     eco_kpi_inapt_lbl: "Inaptas",
     eco_kpi_susp_lbl: "Suspensas",
@@ -935,8 +1421,26 @@ const I18N = {
     eco_sec_title: "CNAEs secundários mais frequentes",
     eco_sec_sub: "Atividades registradas além do CNAE principal — excluídos os puramente associativos (9493/9499)",
     eco_uf_title: "Econômicos por UF",
+    nav_econ_all: "Visão econômica",
+    nav_econ_assoc: "Associações privadas",
+    nav_econ_coop: "Cooperativas",
+    nav_cnae_reg: "CNAE por região",
+    ecoassoc_title: "Econômicos · Associações privadas",
+    ecoassoc_sub: "253 dos 360 empreendimentos econômicos (70,3%) são associações privadas — predominam atividades de representação e defesa de direitos, com forte presença produtiva como CNAE secundário.",
+    ecoassoc_share: "70,3% dos econômicos",
+    ecocoop_title: "Econômicos · Cooperativas",
+    ecocoop_sub: "48 dos 360 empreendimentos econômicos (13,3%) são cooperativas — perfil mais produtivo, com CNAEs principais ligados à agropecuária, ao comércio atacadista e ao extrativismo.",
+    ecocoop_share: "13,3% dos econômicos",
+    grp_total_lbl: "Total no grupo",
+    grp_pri_title: "Ranking de CNAE principal",
+    grp_sec_title: "Ranking de CNAE secundário",
+    grp_reg_title: "Distribuição por região",
+    cnaereg_title: "CNAE por região",
+    cnaereg_sub: "Distribuição dos principais CNAEs (primários e secundários) dos 360 empreendimentos econômicos entre as cinco regiões. As barras empilhadas mostram a concentração de cada atividade por região.",
+    cnaereg_pri_title: "CNAE principal por região",
+    cnaereg_sec_title: "CNAE secundário por região",
     nao_title: "Não econômicos",
-    nao_sub: "2.026 CNPJs cujo CNAE principal e secundário não configuram atividade econômica — escolas, conselhos, igrejas, associações de defesa de direitos etc.",
+    nao_sub: "2.134 CNPJs cujo CNAE principal e secundário não configuram atividade econômica — escolas, conselhos, igrejas, associações de defesa de direitos etc. (inclui 108 reclassificados a partir da triagem econômica).",
     nao_cnae_title: "CNAE principal",
     nao_nat_title: "Natureza jurídica",
     nao_uf_title: "Não econômicos por UF — top 10",
@@ -945,13 +1449,17 @@ const I18N = {
     ass_nat_title: "Natureza jurídica",
     ass_reg_title: "Por região",
     geo_title: "Distribuição geográfica",
-    geo_sub: "Amazonas lidera com 99 registros econômicos (21,2%), seguido do Pará (14,5%) e São Paulo (10,9%).",
+    geo_sub: "Amazonas lidera com 87 registros econômicos (24,2%), seguido do Pará (16,7%) e Mato Grosso (9,4%).",
     pill_eco: "Econômicos",
     pill_nao: "Não econômicos",
     pill_ass: "Associações",
     geo_less: "Menos",
     geo_more: "Mais",
     geo_leg_eco: "Econômicos por UF",
+    geo_cnae_title: "Distribuição por CNAE (econômicos)",
+    geo_cnae_sub: "Selecione uma atividade econômica para ver sua distribuição por UF. A cor e o tamanho dos círculos refletem o número de empreendimentos.",
+    geo_cnae_grp_lbl: "Grupo (setor)",
+    geo_cnae_act_lbl: "Atividade (CNAE)",
     geo_tbl_eco_title: "Econômicos — todas as UFs",
     geo_tbl_nao_title: "Não econômicos — top 10 UFs",
     th_uf: "UF",
@@ -982,7 +1490,7 @@ const I18N = {
     metod_univ_lbl: "Universo",
     metod_univ_body: "CNPJs associados a Terras Indígenas",
     metod_lvls_lbl: "Níveis",
-    metod_lvls_body: "Alto · Muito Alto · Médio Conf. · Médio Prov.",
+    metod_lvls_body: "Alto · Muito Alto · Médio",
     metod_cls_lbl: "Classificação",
     metod_cls_body: "Algoritmo de pontuação CNAE + razão social",
     metod_qsa_lbl: "Sócios (Muito Alto)",
@@ -995,13 +1503,13 @@ const I18N = {
     team_role_researcher: "Pesquisador",
     team_role_researcher_f: "Pesquisadora",
     team_lattes: "Acessar Lattes",
-    footer_title: "EEPI · Empreendimentos Econômicos em Povos Indígenas",
+    footer_title: "EEPI · Empreendimentos Econômicos com Participação Indígena",
     footer_data: "Dados: Receita Federal / minhareceita.org",
     footer_team: "Equipe:",
   },
   en: {
-    hero_title: "Economic<br><em>Enterprises</em> in<br>Indigenous Peoples",
-    hero_sub: "Database built from Brazil’s CNPJ (Federal Revenue) records, classified by economic activity and relevance level. Universe: Indigenous Lands in Brazil.",
+    hero_title: "Economic<br><em>Enterprises</em> with<br>Indigenous Participation",
+    hero_sub: "Database built from Brazil’s CNPJ (Federal Revenue) records, classified by economic activity and relevance level. Sample: 238 Indigenous Lands across 236 municipalities, drawn from the Tinteco database.",
     kpi_cnpjs: "CNPJs analyzed",
     kpi_econ: "Economic enterprises",
     kpi_assoc: "Associations (independent var.)",
@@ -1023,20 +1531,20 @@ const I18N = {
     overview_title: "Database overview",
     overview_sub: "2,705 CNPJs distributed into categories under the project’s methodological criteria.",
     card_total_lbl: "Total analyzed",
-    card_total_det: "High · Very High · Medium (conf.) · Medium (prob.)",
+    card_total_det: "High · Very High · Medium",
     card_eco_lbl: "Economic",
-    card_eco_det: "17.3% of dataset · 397 active",
+    card_eco_det: "13.3% of dataset · 316 active",
     card_nao_lbl: "Non-economic",
-    card_nao_det: "74.9% of dataset · 1,650 active",
+    card_nao_det: "78.9% of dataset · 1,731 active",
     card_ass_lbl: "Associations (independent var.)",
     card_ass_det: "Subset of Non-economic",
     comp_title: "Dataset composition",
-    comp_eco: "Economic (468)",
-    comp_nao: "Non-economic (2,026)",
+    comp_eco: "Economic (360)",
+    comp_nao: "Non-economic (2,134)",
     ov_lvl_title: "By relevance level",
     ov_reg_title: "Economic by region",
     eco_title: "Economic enterprises",
-    eco_sub: "468 CNPJs with a productive main CNAE and/or an economic secondary CNAE confirmed. Dependent variable of the research.",
+    eco_sub: "360 CNPJs with a productive main CNAE and/or an economic secondary CNAE confirmed (after removing 108 false positives). Dependent variable of the research.",
     eco_kpi_active_lbl: "Active",
     eco_kpi_inapt_lbl: "Inactive (inapt)",
     eco_kpi_susp_lbl: "Suspended",
@@ -1045,8 +1553,26 @@ const I18N = {
     eco_sec_title: "Most frequent secondary CNAEs",
     eco_sec_sub: "Activities registered beyond the main CNAE — purely associative CNAEs (9493/9499) excluded",
     eco_uf_title: "Economic by state (UF)",
+    nav_econ_all: "Economic overview",
+    nav_econ_assoc: "Private associations",
+    nav_econ_coop: "Cooperatives",
+    nav_cnae_reg: "CNAE by region",
+    ecoassoc_title: "Economic · Private associations",
+    ecoassoc_sub: "253 of the 360 economic enterprises (70.3%) are private associations — dominated by representation and rights-defense activities, with a strong productive presence as secondary CNAE.",
+    ecoassoc_share: "70.3% of economic",
+    ecocoop_title: "Economic · Cooperatives",
+    ecocoop_sub: "48 of the 360 economic enterprises (13.3%) are cooperatives — a more productive profile, with main CNAEs tied to agriculture, wholesale trade and extractivism.",
+    ecocoop_share: "13.3% of economic",
+    grp_total_lbl: "Group total",
+    grp_pri_title: "Main CNAE ranking",
+    grp_sec_title: "Secondary CNAE ranking",
+    grp_reg_title: "Distribution by region",
+    cnaereg_title: "CNAE by region",
+    cnaereg_sub: "Distribution of the main CNAEs (primary and secondary) of the 360 economic enterprises across the five regions. Stacked bars show each activity's concentration per region.",
+    cnaereg_pri_title: "Main CNAE by region",
+    cnaereg_sec_title: "Secondary CNAE by region",
     nao_title: "Non-economic",
-    nao_sub: "2,026 CNPJs whose main and secondary CNAEs do not indicate economic activity — schools, councils, churches, rights-defense associations, etc.",
+    nao_sub: "2,134 CNPJs whose main and secondary CNAEs do not indicate economic activity — schools, councils, churches, rights-defense associations, etc. (includes 108 reclassified from the economic screening).",
     nao_cnae_title: "Main CNAE",
     nao_nat_title: "Legal nature",
     nao_uf_title: "Non-economic by state — top 10",
@@ -1055,13 +1581,17 @@ const I18N = {
     ass_nat_title: "Legal nature",
     ass_reg_title: "By region",
     geo_title: "Geographic distribution",
-    geo_sub: "Amazonas leads with 99 economic records (21.2%), followed by Pará (14.5%) and São Paulo (10.9%).",
+    geo_sub: "Amazonas leads with 87 economic records (24.2%), followed by Pará (16.7%) and Mato Grosso (9.4%).",
     pill_eco: "Economic",
     pill_nao: "Non-economic",
     pill_ass: "Associations",
     geo_less: "Less",
     geo_more: "More",
     geo_leg_eco: "Economic by state",
+    geo_cnae_title: "Distribution by CNAE (economic)",
+    geo_cnae_sub: "Select an economic activity to see its distribution by state. Circle color and size reflect the number of enterprises.",
+    geo_cnae_grp_lbl: "Group (sector)",
+    geo_cnae_act_lbl: "Activity (CNAE)",
     geo_tbl_eco_title: "Economic — all states",
     geo_tbl_nao_title: "Non-economic — top 10 states",
     th_uf: "State",
@@ -1092,7 +1622,7 @@ const I18N = {
     metod_univ_lbl: "Universe",
     metod_univ_body: "CNPJs associated with Indigenous Lands",
     metod_lvls_lbl: "Levels",
-    metod_lvls_body: "High · Very High · Medium (conf.) · Medium (prob.)",
+    metod_lvls_body: "High · Very High · Medium",
     metod_cls_lbl: "Classification",
     metod_cls_body: "CNAE + corporate-name scoring algorithm",
     metod_qsa_lbl: "Partners (Very High)",
@@ -1105,7 +1635,7 @@ const I18N = {
     team_role_researcher: "Researcher",
     team_role_researcher_f: "Researcher",
     team_lattes: "Open Lattes",
-    footer_title: "EEPI · Economic Enterprises in Indigenous Peoples",
+    footer_title: "EEPI · Economic Enterprises with Indigenous Participation",
     footer_data: "Data: Federal Revenue / minhareceita.org",
     footer_team: "Team:",
   }
@@ -1120,8 +1650,8 @@ function setLang(lang) {
     const val = L[key];
     if (typeof val === 'string') el.innerHTML = val;
   });
-  const btn = document.getElementById('langbtn');
-  if (btn) btn.textContent = (lang === 'en') ? 'PT' : 'EN';
+  const code = document.getElementById('langbtn-code');
+  if (code) code.textContent = (lang === 'en') ? 'PT' : 'EN';
   localStorage.setItem('eepi_lang', lang);
   // rebuild charts with translated labels
   buildCharts(LANG);
@@ -1129,6 +1659,9 @@ function setLang(lang) {
   buildBars(LANG);
   // rerender map legend/tooltip language
   renderMapa(mapaAtual);
+  buildCnaePills();
+  buildGrupoSelect();
+  renderMapaCnae();
 }
 
 (() => {
