@@ -71,7 +71,7 @@
 
   <main>
     <div class="topbar">
-      <a class="back" id="backLink" href="./index.html" data-i18n="back">← Voltar ao painel</a>
+      <a class="back" id="backLink" href="./EEPI_SITE.html" data-i18n="back">← Voltar ao painel</a>
       <span class="meta" id="meta"></span>
     </div>
 
@@ -142,7 +142,7 @@
       const qel = document.getElementById('q');
       if (qel) qel.placeholder = L.search_placeholder;
       const back = document.getElementById('backLink');
-      if (back) { back.textContent = L.back; back.href = `./index.html?lang=${encodeURIComponent(lang)}`; }
+      if (back) { back.textContent = L.back; back.href = `./EEPI_SITE.html?lang=${encodeURIComponent(lang)}`; }
       localStorage.setItem('eepi_lang', lang);
     }
 
